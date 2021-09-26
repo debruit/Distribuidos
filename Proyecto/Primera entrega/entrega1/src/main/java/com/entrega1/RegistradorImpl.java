@@ -24,6 +24,8 @@ import java.rmi.RemoteException;
  */
 public class RegistradorImpl extends UnicastRemoteObject implements Registrador {
 
+    ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
+
     public RegistradorImpl(String name) throws RemoteException {
         super();
         try {
@@ -74,11 +76,21 @@ public class RegistradorImpl extends UnicastRemoteObject implements Registrador 
    }
 
    public boolean registrar(Oferta oferta){
-     FileOutputStream fos = null;
-        ObjectOutputStream salida = null;
+
+    ofertas.add(oferta);
+    FileOutputStream fos = null;
+    ObjectOutputStream salida = null;
+
+    if(ofertas.size()==10){
+
+        
+
+    }
+
+
         try {
          //Se crea el fichero
-            fos = new FileOutputStream("ofertas",true);                                                 
+            fos = new FileOutputStream("backup",true);                                                 
             salida = new ObjectOutputStream(fos);
             //Se escribe el objeto en el fichero
             salida.writeObject(oferta);
