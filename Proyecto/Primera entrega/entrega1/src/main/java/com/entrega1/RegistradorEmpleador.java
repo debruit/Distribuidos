@@ -24,6 +24,7 @@ public class RegistradorEmpleador {
             empleador.bind("ipc://registrador");
 
                 // if(args[0].equals("registrar") && args.length == 7){
+                while(!Thread.currentThread().isInterrupted()){
                     Oferta consulta = new Oferta();
                     consulta.setId(0);
                     consulta.setIdSector(1);
@@ -39,12 +40,18 @@ public class RegistradorEmpleador {
                     // consulta.setCargo(args[5]);
                     // consulta.setSueldo(Integer.parseInt(args[6]));
 
-                    String oferta = String.format("%d %d %d %s %s %d", 
-                        consulta.getId(),consulta.getIdSector(),consulta.getIdEmpleador(),consulta.getDescripcion(),consulta.getCargo(),consulta.getSueldo());
+                    // String oferta = String.format("%d %d %d %s %s %d", 
+                        // consulta.getId(),consulta.getIdSector(),consulta.getIdEmpleador(),consulta.getDescripcion(),consulta.getCargo(),consulta.getSueldo());
 
+
+                    String oferta = String.format("%d %d %d %s %s %d",
+                        consulta.getId(),consulta.getIdSector(),consulta.getIdEmpleador(),consulta.getDescripcion(),consulta.getCargo(),consulta.getSueldo());
+                    
                     empleador.send(oferta, 0);
-                    System.out.println("CAMI GAY");
+
+                    // System.out.println("CAMI GAY");
                 // }
+                }
             
         } catch (Exception e) {
             System.err.println(" System exception: "+ e);
