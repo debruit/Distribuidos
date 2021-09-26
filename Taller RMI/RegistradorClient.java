@@ -10,7 +10,7 @@ public class RegistradorClient {
     public static void main(String args[]) {
 
         try {
-            String serverIP = "25.79.109.185"; // or localhost if client and server on same machine.
+            String serverIP = "25.12.51.131"; // or localhost if client and server on same machine.
             int serverPort = 1099;
             Registry registry = LocateRegistry.getRegistry(serverIP, serverPort);
 
@@ -37,6 +37,9 @@ public class RegistradorClient {
                     System.out.println("Cargo: "+oferta.getCargo());
                     System.out.println("Sueldo: "+oferta.getSueldo());
                 });
+            }
+            else if(args[0].equals("prueba")){
+                miregistrador.prueba();
             }
         } catch (Exception e) {
             System.err.println(" System exception: "+ e);

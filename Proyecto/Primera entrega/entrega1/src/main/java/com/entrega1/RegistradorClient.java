@@ -21,10 +21,7 @@ public class RegistradorClient {
             // Registrador miregistrador = (Registrador) Naming.lookup("rmi://" + "25.12.51.131:1099" + "/" + "MiRegistrador");
 
             // System.out.println("Pudo");
-
-            if(args[0].equals("prueba")){
-                miregistrador.prueba();
-            }
+            miregistrador.prueba();
         } catch (Exception e) {
             System.err.println(" System exception: "+ e);
         }
