@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch filtro",
+            "request": "launch",
+            "mainClass": "com.entrega1.filtro",
+            "projectName": "entrega1"
+        },
+        {
+            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}"

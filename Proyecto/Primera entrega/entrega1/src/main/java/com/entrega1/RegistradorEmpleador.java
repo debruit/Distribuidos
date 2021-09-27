@@ -20,25 +20,25 @@ public class RegistradorEmpleador {
 
         try(ZContext context = new ZContext()) {
             ZMQ.Socket empleador = context.createSocket(SocketType.PUB);
-            empleador.bind("tcp://*:1099");
+            empleador.bind("tcp://25.12.51.131:1099");
             empleador.bind("ipc://registrador");
 
                 // if(args[0].equals("registrar") && args.length == 7){
                 while(!Thread.currentThread().isInterrupted()){
-                    Oferta consulta = new Oferta();
-                    consulta.setId(0);
-                    consulta.setIdSector(1);
-                    consulta.setIdEmpleador(1);
-                    consulta.setDescripcion("Loquesea");
-                    consulta.setCargo("admin");
-                    consulta.setSueldo(1000);
                     // Oferta consulta = new Oferta();
-                    // consulta.setId(Integer.parseInt(args[1]));
-                    // consulta.setIdSector(Integer.parseInt(args[2]));
-                    // consulta.setIdEmpleador(Integer.parseInt(args[3]));
-                    // consulta.setDescripcion(args[4]);
-                    // consulta.setCargo(args[5]);
-                    // consulta.setSueldo(Integer.parseInt(args[6]));
+                    // consulta.setId(0);
+                    // consulta.setIdSector(1);
+                    // consulta.setIdEmpleador(1);
+                    // consulta.setDescripcion("Loquesea");
+                    // consulta.setCargo("admin");
+                    // consulta.setSueldo(1000);
+                    Oferta consulta = new Oferta();
+                    consulta.setId(Integer.parseInt(args[1]));
+                    consulta.setIdSector(Integer.parseInt(args[2]));
+                    consulta.setIdEmpleador(Integer.parseInt(args[3]));
+                    consulta.setDescripcion(args[4]);
+                    consulta.setCargo(args[5]);
+                    consulta.setSueldo(Integer.parseInt(args[6]));
 
                     // String oferta = String.format("%d %d %d %s %s %d", 
                         // consulta.getId(),consulta.getIdSector(),consulta.getIdEmpleador(),consulta.getDescripcion(),consulta.getCargo(),consulta.getSueldo());
