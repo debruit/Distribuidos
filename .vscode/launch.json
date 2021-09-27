@@ -13,6 +13,13 @@
         },
         {
             "type": "java",
+            "name": "Launch Server1",
+            "request": "launch",
+            "mainClass": "com.entrega1.Server1",
+            "projectName": "entrega1"
+        },
+        {
+            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}"

@@ -1,9 +1,6 @@
 package com.entrega1;
 
 // import java.rmi.*;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.util.Random;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -20,7 +17,7 @@ public class RegistradorEmpleador {
 
         try(ZContext context = new ZContext()) {
             ZMQ.Socket empleador = context.createSocket(SocketType.PUB);
-            empleador.bind("tcp://25.12.51.131:1099");
+            empleador.bind("tcp://*:1099");
             empleador.bind("ipc://registrador");
 
                 // if(args[0].equals("registrar") && args.length == 7){
