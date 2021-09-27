@@ -25,7 +25,7 @@ public class Server1 {
                 server.bind("tcp://*:1098");
 
                 while(!Thread.currentThread().isInterrupted()){
-                    // byte[] reply = server.recv(0);
+                    byte[] reply = server.recv(0);
 
                     String response = "Llego al servidor";
 

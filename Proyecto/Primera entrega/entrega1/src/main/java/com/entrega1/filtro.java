@@ -24,7 +24,7 @@ public class filtro {
             try(ZContext context = new ZContext()){
                 System.out.println("Corriendo filtro...");
                 ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-                subscriber.connect("tcp://localhost:1099");
+                subscriber.connect("tcp://25.12.51.131:1099");
 
                 String filter = "0";
 
@@ -42,7 +42,7 @@ public class filtro {
                 System.out.println("Sector: "+ idSector);
 
                 ZMQ.Socket server = context.createSocket(SocketType.REQ);
-                server.connect("tcp://localhost:1098");
+                server.connect("tcp://25.12.51.131:1098");
                 for (int i = 0; i <10;i++){
                     server.send(descripcion.getBytes(ZMQ.CHARSET), 0);
 
