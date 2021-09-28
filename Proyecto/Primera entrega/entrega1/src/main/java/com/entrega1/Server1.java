@@ -39,7 +39,7 @@ public class Server1 {
 
                     Oferta temp = new Oferta();
 
-                    StringTokenizer token = new StringTokenizer(oferta, " ");
+                    StringTokenizer token = new StringTokenizer(oferta, "-");
                     temp.setId(Integer.valueOf(token.nextToken()));
                     temp.setIdSector(Integer.valueOf(token.nextToken()));
                     temp.setIdEmpleador(Integer.valueOf(token.nextToken()));

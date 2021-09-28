@@ -39,8 +39,8 @@ public class filtro {
 
                 String mensaje = subscriber.recvStr(0).trim();
 
-                StringTokenizer token = new StringTokenizer(mensaje, " ");
-                int pos = Integer.valueOf(token.nextToken());
+                StringTokenizer token = new StringTokenizer(mensaje, "-");
+                Integer.valueOf(token.nextToken());
                 temp.setId(Integer.valueOf(token.nextToken()));
                 temp.setIdSector(Integer.valueOf(token.nextToken()));
                 temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
@@ -49,17 +49,17 @@ public class filtro {
                 temp.setSueldo(Integer.valueOf(token.nextToken()));
                 ofertas.add(temp);
 
-                if (ofertas.size() == 2) {
+                if (ofertas.size() >= 2) {
 
                     ZMQ.Socket server = context.createSocket(SocketType.REQ);
-                    server.connect("tcp://25.83.21.137:1098");
+                    server.connect("tcp://25.12.51.131:1098");
                     for (int i = 0; i < ofertas.size(); i++) {
 
                         switch (ofertas.get(i).getIdSector()) {
                             case 1:
                                 System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertaServer = String.format("%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
                                 ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                                 ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
@@ -68,7 +68,7 @@ public class filtro {
                             case 2:
                                 System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertaServer = String.format("%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
                                 ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                                 ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
@@ -77,7 +77,7 @@ public class filtro {
                             case 3:
                                 System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertaServer = String.format("%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
                                 ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                                 ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
@@ -86,7 +86,7 @@ public class filtro {
                             case 4:
                                 System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertaServer = String.format("%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
                                 ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                                 ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
@@ -95,7 +95,7 @@ public class filtro {
                             case 5:
                                 System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertaServer = String.format("%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
                                 ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                                 ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
