@@ -18,7 +18,8 @@ public class RegistradorEmpleador {
 
         // Random rand = new Random();
         int id, sector, sueldo, filtro,idoferta;
-        String descripcion, cargo;
+        String descripcion, cargo,resp;
+        boolean otra;
 
         try (ZContext context = new ZContext()) {
             ZMQ.Socket empleador = context.createSocket(SocketType.PUB);
@@ -26,14 +27,15 @@ public class RegistradorEmpleador {
             empleador.bind("ipc://registrador");
 
             Scanner entrada = new Scanner(System.in);
-            System.out.println("Cuantas ofertas desea ingresar?");
-            int cantOfertas = entrada.nextInt();
-            for (int i = 0; i < cantOfertas; i++) {
+            
+            do{
+                otra = false;
                 Oferta consulta = new Oferta();
                 filtro = 0;
                 System.out.println("ID oferta");
                 idoferta = entrada.nextInt();
                 consulta.setId(idoferta);
+
                 System.out.println("Indique su ID");
                 id = entrada.nextInt();
                 consulta.setIdEmpleador(id);
@@ -56,7 +58,14 @@ public class RegistradorEmpleador {
                         consulta.getSueldo());
 
                 empleador.send(oferta, 0);
-            }
+
+                System.out.println("Desea ingresar otra oferta? (y/n)");
+                resp = entrada.next();
+                if(resp == "y"){
+                    otra = true;
+                }
+            }while(otra == true);
+
             entrada.close();
 
         } catch (Exception e) {

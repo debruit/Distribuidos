@@ -52,7 +52,7 @@ public class filtro {
                 if (ofertas.size() == 2) {
 
                     ZMQ.Socket server = context.createSocket(SocketType.REQ);
-                    server.connect("tcp://25.12.51.131:1098");
+                    server.connect("tcp://25.83.21.137:1098");
                     for (int i = 0; i < ofertas.size(); i++) {
 
                         switch (ofertas.get(i).getIdSector()) {
