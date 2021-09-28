@@ -22,57 +22,96 @@ public class filtro {
     public static void main(String args[]) {
 
         ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
+        String ofertaServer;
 
-            try(ZContext context = new ZContext()){
-                System.out.println("Corriendo filtro...");
-                ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-                subscriber.connect("tcp://25.12.51.131:1099");
+        try (ZContext context = new ZContext()) {
+            System.out.println("Corriendo filtro...");
+            ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+            subscriber.connect("tcp://25.12.51.131:1099");
 
-                String filter = "0";
+            String filter = "0";
 
-                subscriber.subscribe(filter.getBytes(ZMQ.CHARSET));
+            subscriber.subscribe(filter.getBytes(ZMQ.CHARSET));
 
-                while(true){
+            while (true) {
 
-                    Oferta temp = new Oferta();
+                Oferta temp = new Oferta();
 
-                    String mensaje = subscriber.recvStr(0).trim();
+                String mensaje = subscriber.recvStr(0).trim();
 
-                    StringTokenizer token = new StringTokenizer(mensaje, " ");
-                    int pos = Integer.valueOf(token.nextToken());
-                    temp.setId(Integer.valueOf(token.nextToken()));
-                    temp.setIdSector(Integer.valueOf(token.nextToken()));
-                    temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
-                    temp.setDescripcion(token.nextToken());
-                    temp.setCargo(token.nextToken());
-                    temp.setSueldo(Integer.valueOf(token.nextToken()));
-                    ofertas.add(temp);
+                StringTokenizer token = new StringTokenizer(mensaje, " ");
+                int pos = Integer.valueOf(token.nextToken());
+                temp.setId(Integer.valueOf(token.nextToken()));
+                temp.setIdSector(Integer.valueOf(token.nextToken()));
+                temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
+                temp.setDescripcion(token.nextToken());
+                temp.setCargo(token.nextToken());
+                temp.setSueldo(Integer.valueOf(token.nextToken()));
+                ofertas.add(temp);
 
-                    if(ofertas.size()==2){
-                        
-                        ZMQ.Socket server = context.createSocket(SocketType.REQ);
-                        server.connect("tcp://25.12.51.131:1098");
-                        for (int i = 0; i <ofertas.size();i++){
+                if (ofertas.size() == 2) {
 
-                            String oferta = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(), ofertas.get(i).getIdSector(),
-                            ofertas.get(i).getIdEmpleador(), ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(),
-                            ofertas.get(i).getSueldo());
+                    ZMQ.Socket server = context.createSocket(SocketType.REQ);
+                    server.connect("tcp://25.12.51.131:1098");
+                    for (int i = 0; i < ofertas.size(); i++) {
 
-                            server.send(oferta.getBytes(ZMQ.CHARSET), 0);
+                        switch (ofertas.get(i).getIdSector()) {
+                            case 1:
+                                System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                            System.out.println("Oferta enviada");
+                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
+                                ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
-                            byte[] reply = server.recv(0);
+                                server.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                                break;
+                            case 2:
+                                System.out.println("Sector: " + ofertas.get(i).getIdSector());
 
-                            System.out.println(new String(reply,ZMQ.CHARSET));
+                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
+                                ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+
+                                server.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                                break;
+                            case 3:
+                                System.out.println("Sector: " + ofertas.get(i).getIdSector());
+
+                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
+                                ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+
+                                server.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                                break;
+                            case 4:
+                                System.out.println("Sector: " + ofertas.get(i).getIdSector());
+
+                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
+                                ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+
+                                server.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                                break;
+                            case 5:
+                                System.out.println("Sector: " + ofertas.get(i).getIdSector());
+
+                                ofertaServer = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(),
+                                ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
+                                ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+
+                                server.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                                break;
                         }
-                    }
 
-                    System.out.println("Oferta: "+temp.getId());
+                        byte[] reply = server.recv(0);
+
+                        System.out.println(new String(reply, ZMQ.CHARSET));
+                    }
                 }
-                
-            } catch (Exception e) {
-                System.err.println(" System exception: "+ e);
             }
+
+        } catch (Exception e) {
+            System.err.println(" System exception: " + e);
+        }
     }
 }
