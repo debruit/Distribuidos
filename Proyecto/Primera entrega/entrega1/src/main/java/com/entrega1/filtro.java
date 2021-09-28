@@ -1,5 +1,6 @@
 package com.entrega1;
 
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.zeromq.SocketType;
@@ -20,7 +21,8 @@ public class filtro {
 
     public static void main(String args[]) {
 
-        // while(true){
+        ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
+
             try(ZContext context = new ZContext()){
                 System.out.println("Corriendo filtro...");
                 ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
@@ -30,25 +32,43 @@ public class filtro {
 
                 subscriber.subscribe(filter.getBytes(ZMQ.CHARSET));
 
-                String mensaje = subscriber.recvStr(0).trim();
-                StringTokenizer token = new StringTokenizer(mensaje, " ");
-                int idOferta = Integer.valueOf(token.nextToken());
-                int idSector = Integer.valueOf(token.nextToken());
-                int idEmpleador= Integer.valueOf(token.nextToken());
-                String descripcion = token.nextToken();
-                String cargo = token.nextToken();
-                int sueldo= Integer.valueOf(token.nextToken());
+                while(true){
 
-                System.out.println("Sector: "+ idSector);
+                    Oferta temp = new Oferta();
 
-                ZMQ.Socket server = context.createSocket(SocketType.REQ);
-                server.connect("tcp://25.12.51.131:1098");
-                for (int i = 0; i <10;i++){
-                    server.send(descripcion.getBytes(ZMQ.CHARSET), 0);
+                    String mensaje = subscriber.recvStr(0).trim();
 
-                    byte[] reply = server.recv(0);
+                    StringTokenizer token = new StringTokenizer(mensaje, " ");
+                    int pos = Integer.valueOf(token.nextToken());
+                    temp.setId(Integer.valueOf(token.nextToken()));
+                    temp.setIdSector(Integer.valueOf(token.nextToken()));
+                    temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
+                    temp.setDescripcion(token.nextToken());
+                    temp.setCargo(token.nextToken());
+                    temp.setSueldo(Integer.valueOf(token.nextToken()));
+                    ofertas.add(temp);
 
-                    System.out.println("Received: "+ new String(reply,ZMQ.CHARSET)+" "+i);
+                    if(ofertas.size()==2){
+                        
+                        ZMQ.Socket server = context.createSocket(SocketType.REQ);
+                        server.connect("tcp://25.12.51.131:1098");
+                        for (int i = 0; i <ofertas.size();i++){
+
+                            String oferta = String.format("%d %d %d %s %s %d", ofertas.get(i).getId(), ofertas.get(i).getIdSector(),
+                            ofertas.get(i).getIdEmpleador(), ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(),
+                            ofertas.get(i).getSueldo());
+
+                            server.send(oferta.getBytes(ZMQ.CHARSET), 0);
+
+                            System.out.println("Oferta enviada");
+
+                            byte[] reply = server.recv(0);
+
+                            System.out.println(new String(reply,ZMQ.CHARSET));
+                        }
+                    }
+
+                    System.out.println("Oferta: "+temp.getId());
                 }
                 
             } catch (Exception e) {
