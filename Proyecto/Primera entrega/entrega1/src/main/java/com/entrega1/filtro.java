@@ -49,7 +49,7 @@ public class filtro {
                 temp.setSueldo(Integer.valueOf(token.nextToken()));
                 ofertas.add(temp);
 
-                if (ofertas.size() >= 2) {
+                if (ofertas.size() >= 10) {
 
                     ZMQ.Socket server = context.createSocket(SocketType.REQ);
                     server.connect("tcp://25.12.51.131:1098");
