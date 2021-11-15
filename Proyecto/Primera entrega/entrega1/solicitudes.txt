@@ -1,0 +1,18 @@
+Juan
+1
+Profesional en ingeniería de software
+2
+Ingeniero en sistemas
+/
+Juan
+1
+Profesional en ingeniería de software
+2
+Cientifico
+/
+Rizo
+1
+Profesional en ingeniería de software
+2
+Pesquero
+/

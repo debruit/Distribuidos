@@ -35,31 +35,70 @@ public class Server1 {
                 server.bind("tcp://*:1098");
 
                 while(!Thread.currentThread().isInterrupted()){
-                    String oferta = server.recvStr(0).trim();
+                    String solicitud = server.recvStr(0).trim();
 
-                    Oferta temp = new Oferta();
+                    StringTokenizer token = new StringTokenizer(solicitud, "-");
+                    if(token.nextToken().equals("Aspirante")){
+                        Aspirante temp = new Aspirante();
 
-                    StringTokenizer token = new StringTokenizer(oferta, "-");
-                    temp.setId(Integer.valueOf(token.nextToken()));
-                    temp.setIdSector(Integer.valueOf(token.nextToken()));
-                    temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
-                    temp.setDescripcion(token.nextToken());
-                    temp.setCargo(token.nextToken());
-                    temp.setSueldo(Integer.valueOf(token.nextToken()));
+                        temp.setIdAspirante(Integer.valueOf(token.nextToken()));
+                        temp.setNombre(token.nextToken());
+                        temp.setHabilidades(token.nextToken());
+                        temp.setEstudios(token.nextToken());
+                        temp.setExperiencia(Integer.valueOf(token.nextToken()));
+                        temp.setIdSector(Integer.valueOf(token.nextToken()));
 
-                    key = Integer.toString(temp.getId()) +"_"+Integer.toString(temp.getIdEmpleador());
-                    value = temp;
+                        System.out.println("Llego solicitud: "+ temp.getIdAspirante());
+
+                        String response = "Solicitud "+temp.getIdAspirante()+" OK en el servidor";
+
+                        server.send(response.getBytes(ZMQ.CHARSET),0);
+
+                        Thread.sleep(1000);
+                    }else{
+                        Oferta temp = new Oferta();
+
+                        temp.setId(Integer.valueOf(token.nextToken()));
+                        temp.setSector(token.nextToken());
+                        temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
+                        temp.setDescripcion(token.nextToken());
+                        temp.setCargo(token.nextToken());
+                        temp.setSueldo(Integer.valueOf(token.nextToken()));
+
+                        System.out.println("Llego oferta: "+ temp.getId());
+
+                        String response = "Oferta "+temp.getId()+" OK en el servidor";
+
+                        server.send(response.getBytes(ZMQ.CHARSET),0);
+
+                        Thread.sleep(1000);
+                    }
+
+                    // String oferta = server.recvStr(0).trim();
+
+                    // Oferta temp = new Oferta();
+
+                    // StringTokenizer token = new StringTokenizer(oferta, "-");
+                    // temp.setId(Integer.valueOf(token.nextToken()));
+                    // temp.setSector(token.nextToken());
+                    // temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
+                    // temp.setDescripcion(token.nextToken());
+                    // temp.setCargo(token.nextToken());
+                    // temp.setSueldo(Integer.valueOf(token.nextToken()));
+
+                    // key = Integer.toString(temp.getId()) +"_"+Integer.toString(temp.getIdEmpleador());
+                    // value = temp;
 
 
-                    dht(key,value);
+                    // dht(key,value);
 
-                    System.out.println("Llego oferta: "+ temp.getId());
+                    // System.out.println("Llego oferta: "+ temp.getId());
 
-                    String response = "Oferta "+temp.getId()+" OK en el servidor";
+                    // String response = "Oferta "+temp.getId()+" OK en el servidor";
 
-                    server.send(response.getBytes(ZMQ.CHARSET),0);
+                    // server.send(response.getBytes(ZMQ.CHARSET),0);
 
-                    Thread.sleep(1000);
+                    // Thread.sleep(1000);
                 }
                 
             } catch (Exception e) {
