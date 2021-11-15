@@ -71,7 +71,7 @@ public class RegistradorAspirante {
                 System.out.println("Esperando respuesta vacante...");
 
                 // for de todos los aspirantes
-
+            
                 // Id del sector
                 String respuesta = "0";
 
