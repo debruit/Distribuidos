@@ -26,7 +26,7 @@ public class RegistradorEmpleador {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
+                File file = new File("empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;
@@ -36,10 +36,13 @@ public class RegistradorEmpleador {
                     consulta.setDescripcion(myReader.nextLine());
                     consulta.setCargo(myReader.nextLine());
                     consulta.setSueldo(Integer.parseInt(myReader.nextLine()));
+                    consulta.setExperiencia(Integer.parseInt(myReader.nextLine()));
+                    consulta.setHabilidades(myReader.nextLine());
+                    consulta.setEstudios(myReader.nextLine());
 
-                    String oferta = String.format("%d-Oferta-%d-%d-%s-%s-%d", filtro, consulta.getId(),
+                    String oferta = String.format("%d-Oferta-%d-%d-%s-%s-%d-%d-%s-%s", filtro, consulta.getId(),
                             consulta.getIdEmpleador(), consulta.getDescripcion(), consulta.getCargo(),
-                            consulta.getSueldo());
+                            consulta.getSueldo(), consulta.getExperiencia(), consulta.getHabilidades(), consulta.getEstudios());
 
                     empleador.send(oferta, 0);
 
@@ -50,23 +53,10 @@ public class RegistradorEmpleador {
 
                     ofertas.add(consulta);
 
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 }
                 myReader.close();
-
-                // for de los empleadores para notificar
-
-                ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-                subscriber.connect("tcp://127.0.0.1:4099");
-
-                // Id del sector
-                String respuesta = "0";
-
-                subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
-
-                String mensaje = subscriber.recvStr(0).trim();
-
-                System.out.println("Mensaje recibido: " + mensaje);
+                empleador.close();
             } catch (FileNotFoundException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
@@ -78,6 +68,7 @@ public class RegistradorEmpleador {
         try (ZContext context = new ZContext()) {
             ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
             subscriber.connect("tcp://127.0.0.1:4099");
+            System.out.println("Esperando respuesta aspirante...");
 
             // Id del sector
             String respuesta = "0";

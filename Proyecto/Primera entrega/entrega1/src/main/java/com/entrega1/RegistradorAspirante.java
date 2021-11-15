@@ -26,7 +26,7 @@ public class RegistradorAspirante {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("Proyecto\\Primera entrega\\entrega1\\solicitudes.txt");
+                File file = new File("solicitudes.txt");
                 Scanner myReader = new Scanner(file);
                 Aspirante solicitud = new Aspirante();
                 filtro = 0;
@@ -51,12 +51,24 @@ public class RegistradorAspirante {
 
                     aspirantes.add(solicitud);
 
-                    // Thread.sleep(5000);
+                    Thread.sleep(2000);
                 }
                 myReader.close();
+                empleador.close();
 
-                ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+            } catch (FileNotFoundException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }
+
+        } catch (Exception e) {
+            System.err.println(" System exception: " + e);
+        }
+
+        try (ZContext context = new ZContext()){
+            ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
                 subscriber.connect("tcp://127.0.0.1:2099");
+                System.out.println("Esperando respuesta vacante...");
 
                 // for de todos los aspirantes
 
@@ -82,12 +94,6 @@ public class RegistradorAspirante {
                 respuestaSocket.send(respuestaAspirante, 0);
 
                 // Thread.sleep(5000);
-
-            } catch (FileNotFoundException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
-
         } catch (Exception e) {
             System.err.println(" System exception: " + e);
         }

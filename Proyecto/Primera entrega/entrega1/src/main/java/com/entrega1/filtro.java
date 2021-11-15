@@ -47,12 +47,15 @@ public class filtro {
         try (ZContext context = new ZContext()) {
             System.out.println("Corriendo filtro...");
             ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+            // ZMQ.Socket subscriber2 = context.createSocket(SocketType.SUB);
             // subscriber.connect("tcp://25.12.51.131:1099");
             subscriber.connect("tcp://127.0.0.1:1099");
+            // subscriber2.connect("tcp://127.0.0.1:1234");
 
             String solicitud = "0";
 
             subscriber.subscribe(solicitud.getBytes(ZMQ.CHARSET));
+            // subscriber2.subscribe(solicitud.getBytes(ZMQ.CHARSET));
 
             while (true) {
 
@@ -68,9 +71,9 @@ public class filtro {
                     doneOferta = agregarOferta(token, ofertas, context, sector, ofertaServer);
                 }
 
-                if (doneSolicitud && doneOferta) {
-                    notificaciones(context);
-                }
+                // if (doneSolicitud && doneOferta) {
+                //     notificaciones(context);
+                // }
 
             }
 
@@ -245,6 +248,9 @@ public class filtro {
         temp2.setDescripcion(token.nextToken());
         temp2.setCargo(token.nextToken());
         temp2.setSueldo(Integer.valueOf(token.nextToken()));
+        temp2.setExperiencia(Integer.valueOf(token.nextToken()));
+        temp2.setHabilidades(token.nextToken());
+        temp2.setEstudios(token.nextToken());
         ofertas.add(temp2);
         setBackupOfertas(ofertas);
 
@@ -268,9 +274,10 @@ public class filtro {
 
                     ofertas.get(i).setSector(1);
 
-                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
+                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -281,9 +288,10 @@ public class filtro {
 
                     ofertas.get(i).setSector(2);
 
-                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
+                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -295,9 +303,10 @@ public class filtro {
 
                     ofertas.get(i).setSector(3);
 
-                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
+                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -309,9 +318,10 @@ public class filtro {
 
                     ofertas.get(i).setSector(4);
 
-                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
+                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -322,9 +332,10 @@ public class filtro {
 
                     ofertas.get(i).setSector(5);
 
-                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
+                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
