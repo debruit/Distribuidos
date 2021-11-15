@@ -7,7 +7,7 @@ public class Aspirante implements Serializable {
     // Atributos
     int idAspirante;
     String nombre;
-    int idSector;
+    String idSector;
     int experiencia;
     String estudios;
     String habilidades;
@@ -19,8 +19,8 @@ public class Aspirante implements Serializable {
 
     }
 
-    public Aspirante(int idAspirante, String nombre, int idSector, int experiencia, String estudios, String habilidades,
-            ArrayList<Boolean> ofertasAceptadas) {
+    public Aspirante(int idAspirante, String nombre, String idSector, int experiencia, String estudios,
+            String habilidades, ArrayList<Boolean> ofertasAceptadas) {
         this.idAspirante = idAspirante;
         this.nombre = nombre;
         this.idSector = idSector;
@@ -54,11 +54,11 @@ public class Aspirante implements Serializable {
         this.nombre = nombre;
     }
 
-    public int getIdSector() {
+    public String getIdSector() {
         return idSector;
     }
 
-    public void setIdSector(int idSector) {
+    public void setIdSector(String idSector) {
         this.idSector = idSector;
     }
 

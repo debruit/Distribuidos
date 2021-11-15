@@ -73,7 +73,8 @@ public class filtro {
         if (solicitudes.size() > 1) {
 
             ZMQ.Socket server = context.createSocket(SocketType.REQ);
-            server.connect("tcp://25.12.51.131:1098");
+            // server.connect("tcp://25.12.51.131:1098");
+            server.connect("tcp://127.0.0.1:1098");
             for (int i = 0; i < solicitudes.size(); i++) {
 
                 sector = solicitudes.get(i).getHabilidades();
@@ -145,10 +146,16 @@ public class filtro {
         temp2.setSueldo(Integer.valueOf(token.nextToken()));
         ofertas.add(temp2);
 
-        if (ofertas.size() > 1) {
-
-            ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
-            server2.connect("tcp://25.12.51.131:1098");
+        if (ofertas.size() > 0) {
+            // ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
+            ZMQ.Socket server21 = context.createSocket(SocketType.REQ);
+            ZMQ.Socket server22 = context.createSocket(SocketType.REQ);
+            ZMQ.Socket server23 = context.createSocket(SocketType.REQ);
+            // server2.connect("tcp://25.12.51.131:1098");
+            // server2.connect("tcp://127.0.0.1:1098");
+            server21.connect("tcp://127.0.0.1:1101");
+            server22.connect("tcp://127.0.0.1:1102");
+            server23.connect("tcp://127.0.0.1:1103");
             for (int i = 0; i < ofertas.size(); i++) {
 
                 sector = ofertas.get(i).getCargo();
@@ -163,7 +170,10 @@ public class filtro {
                             ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
-                    server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Cientifico") || sector.contains("Fisico")) {
                     System.out.println("Sector: PROFESIONALES CIENTIFICOS E INTELECTUALES");
 
@@ -173,7 +183,10 @@ public class filtro {
                             ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
-                    server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Ingeniero") || sector.contains("Tecnico") || sector.contains("Operario")
                         || sector.contains("Asistente")) {
                     System.out.println("Sector: TECNICOS Y PROFESIONALES");
@@ -184,7 +197,10 @@ public class filtro {
                             ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
-                    server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Administrativo") || sector.contains("Secretaria")
                         || sector.contains("Recepcionista") || sector.contains("Auxiliar")) {
                     System.out.println("Sector: PERSONAL DE APOYO ADMNISTRATIVO");
@@ -195,7 +211,10 @@ public class filtro {
                             ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
-                    server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Agricultor") || sector.contains("Pesquero")) {
                     System.out.println("Sector: AGRICULTORES FORESTALES Y PESQUEROS");
 
@@ -205,12 +224,24 @@ public class filtro {
                             ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
-                    server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                 }
-                byte[] reply = server2.recv(0);
+                // byte[] reply = server2.recv(0);
+                byte[] reply1 = server21.recv(0);
+                byte[] reply2 = server22.recv(0);
+                byte[] reply3 = server23.recv(0);
 
-                System.out.println(new String(reply, ZMQ.CHARSET));
+                // System.out.println(new String(reply, ZMQ.CHARSET));
+                System.out.println(new String(reply1, ZMQ.CHARSET));
+                System.out.println(new String(reply2, ZMQ.CHARSET));
+                System.out.println(new String(reply3, ZMQ.CHARSET));
+                System.out.println();
+
             }
+            ofertas.clear();
         }
 
     }

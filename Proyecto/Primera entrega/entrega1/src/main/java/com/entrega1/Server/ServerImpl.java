@@ -28,20 +28,20 @@ import org.zeromq.ZMQ;
 public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
 
-    static int serverId = 85;
-    static int sucesor = 170;
-    static int predecesor = 255;
+    static int serverId = 255;
+    static int sucesor = 85;
+    static int predecesor = 170;
     static ZMQ.Socket server;
     static ZMQ.Socket sucesorServer;
     // static String sucesorIP = "tcp://25.12.51.131:1098";// cambiar ip
 
-    static String sucesorIP = "tcp://127.0.0.1:1102";
+    static String sucesorIP = "tcp://127.0.0.1:1101";
     // static String sucesorIP = "tcp://127.0.0.1:1103";
     // static String sucesorIP = "tcp://127.0.0.1:1101";
     static ZMQ.Socket antecesorServer;
     // static String antecesorIP = "tcp://25.12.51.131:1098";// cambiar ip
 
-    static String antecesorIP = "tcp://127.0.0.1:1103";
+    static String antecesorIP = "tcp://127.0.0.1:1102";
     // static String antecesorIP = "tcp://127.0.0.1:1101";
     // static String antecesorIP = "tcp://127.0.0.1:1102";
 
@@ -57,7 +57,7 @@ public class ServerImpl {
             // Socket con filtro
             server = context.createSocket(SocketType.REP);
             // server.bind("tcp://*:1101");
-            server.bind("tcp://*:1101");
+            server.bind("tcp://*:1103");
             // server.bind("tcp://*:1103");
 
             // Socket con sucesor
@@ -77,7 +77,8 @@ public class ServerImpl {
                     Oferta ofertaRecibida = new Oferta();
                     StringTokenizer tokenOferta = new StringTokenizer(ofertaStr, "-");
                     ofertaRecibida.setId(Integer.valueOf(tokenOferta.nextToken()));
-                    ofertaRecibida.setIdSector(Integer.valueOf(tokenOferta.nextToken()));
+                    // ofertaRecibida.setIdSector(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setIdSector(tokenOferta.nextToken());
                     ofertaRecibida.setIdEmpleador(Integer.valueOf(tokenOferta.nextToken()));
                     ofertaRecibida.setDescripcion(tokenOferta.nextToken());
                     ofertaRecibida.setCargo(tokenOferta.nextToken());
@@ -94,7 +95,8 @@ public class ServerImpl {
                     Aspirante solicitudRecibida = new Aspirante();
                     solicitudRecibida.setIdAspirante(Integer.valueOf(tokenSolicitud.nextToken()));
                     solicitudRecibida.setNombre(tokenSolicitud.nextToken());
-                    solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
+                    // solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
+                    solicitudRecibida.setIdSector(tokenSolicitud.nextToken());
                     solicitudRecibida.setExperiencia(Integer.valueOf(tokenSolicitud.nextToken()));
                     solicitudRecibida.setEstudios(tokenSolicitud.nextToken());
                     solicitudRecibida.setHabilidades(tokenSolicitud.nextToken());
@@ -108,7 +110,7 @@ public class ServerImpl {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            System.err.println(" System exception: " + e);
+            System.err.println("Server System exception: " + e);
         }
     }
 
@@ -132,7 +134,7 @@ public class ServerImpl {
         for (int j = 0; j < ofertasDht.size(); j++) {
             if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
-                    res = res + ofertasDht.get(j) + "_" + solicitud + "|";
+                    res = res + ofertasDht.get(j) + "_" + solicitud;
                 }
             }
         }

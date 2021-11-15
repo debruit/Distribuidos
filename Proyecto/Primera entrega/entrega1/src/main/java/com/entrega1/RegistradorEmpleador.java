@@ -16,7 +16,7 @@ public class RegistradorEmpleador {
 
     public static void main(String args[]) {
 
-        int filtro,i=1;
+        int filtro, i = 0;
 
         try (ZContext context = new ZContext()) {
             ZMQ.Socket empleador = context.createSocket(SocketType.PUB);
@@ -24,7 +24,7 @@ public class RegistradorEmpleador {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("empleador.txt");
+                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;
@@ -36,24 +36,23 @@ public class RegistradorEmpleador {
                     consulta.setSueldo(Integer.parseInt(myReader.nextLine()));
 
                     String oferta = String.format("%d-Oferta-%d-%d-%s-%s-%d", filtro, consulta.getId(),
-                        consulta.getIdEmpleador(), consulta.getDescripcion(), consulta.getCargo(),
-                        consulta.getSueldo());
+                            consulta.getIdEmpleador(), consulta.getDescripcion(), consulta.getCargo(),
+                            consulta.getSueldo());
 
                     empleador.send(oferta, 0);
 
-                    if(myReader.nextLine().equals("/")){
+                    if (myReader.nextLine().equals("/")) {
                         consulta = new Oferta();
                         i++;
                     }
 
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 }
                 myReader.close();
             } catch (FileNotFoundException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
             }
-
 
         } catch (Exception e) {
             System.err.println(" System exception: " + e);
