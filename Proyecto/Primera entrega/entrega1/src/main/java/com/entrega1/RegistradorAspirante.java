@@ -2,6 +2,7 @@ package com.entrega1;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.zeromq.SocketType;
@@ -16,7 +17,8 @@ public class RegistradorAspirante {
 
     public static void main(String args[]) {
 
-        int filtro,i=1;
+        int filtro, i = 0;
+        ArrayList<Aspirante> aspirantes = new ArrayList<Aspirante>();
 
         try (ZContext context = new ZContext()) {
             ZMQ.Socket empleador = context.createSocket(SocketType.PUB);
@@ -36,20 +38,51 @@ public class RegistradorAspirante {
                     solicitud.setExperiencia(Integer.parseInt(myReader.nextLine()));
                     solicitud.setHabilidades(myReader.nextLine());
 
-                    String solicitudNueva = String.format("%d-Aspirante-%d-%s-%s-%s-%d-%d", filtro, solicitud.getIdAspirante(),
-                        solicitud.getNombre(), solicitud.getHabilidades(), solicitud.getEstudios(),
-                        solicitud.getExperiencia(), solicitud.getIdSector());
+                    String solicitudNueva = String.format("%d-Aspirante-%d-%s-%s-%s-%d-%d", filtro,
+                            solicitud.getIdAspirante(), solicitud.getNombre(), solicitud.getHabilidades(),
+                            solicitud.getEstudios(), solicitud.getExperiencia(), solicitud.getIdSector());
 
                     empleador.send(solicitudNueva, 0);
 
-                    if(myReader.nextLine().equals("/")){
+                    if (myReader.nextLine().equals("/")) {
                         solicitud = new Aspirante();
                         i++;
                     }
 
-                    Thread.sleep(5000);
+                    aspirantes.add(solicitud);
+
+                    // Thread.sleep(5000);
                 }
                 myReader.close();
+
+                ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+                subscriber.connect("tcp://127.0.0.1:2099");
+
+                //for de todos los aspirantes
+
+                // Id del sector
+                String respuesta = "0";
+
+                subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
+
+                String mensaje = subscriber.recvStr(0).trim();
+
+                //Evalua la vacante y responde
+                ZMQ.Socket respuestaSocket = context.createSocket(SocketType.PUB);
+                respuestaSocket.bind("tcp://*:3099");
+                respuestaSocket.bind("ipc://respuesta");
+
+                System.out.println("Acepta la vacante? (y/n)");
+
+                boolean acepta = System.console().readLine().equals("y");
+
+                int id = 0;
+
+                String respuestaAspirante = String.format("%d-%b",id,acepta);
+                respuestaSocket.send(respuestaAspirante, 0);
+
+                // Thread.sleep(5000);
+
             } catch (FileNotFoundException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();

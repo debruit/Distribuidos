@@ -14,15 +14,15 @@ import java.io.Serializable;
 public class Oferta implements Serializable {
     // atributos
     int id;
-    String sector;
+    int idSector;
     int idEmpleador;
     String descripcion;
     String cargo;
     int sueldo;
 
-    public Oferta(int id, String sector, int idEmpleador, String descripcion, String cargo, int sueldo) {
+    public Oferta(int id, int sector, int idEmpleador, String descripcion, String cargo, int sueldo) {
         this.id = id;
-        this.sector = sector;
+        this.idSector = sector;
         this.idEmpleador = idEmpleador;
         this.descripcion = descripcion;
         this.cargo = cargo;
@@ -41,12 +41,12 @@ public class Oferta implements Serializable {
         this.id = id;
     }
 
-    public String getSector() {
-        return sector;
+    public int getIdSector() {
+        return idSector;
     }
 
-    public void setSector(String sector) {
-        this.sector = sector;
+    public void setSector(int sector) {
+        this.idSector = sector;
     }
 
     public int getIdEmpleador() {
