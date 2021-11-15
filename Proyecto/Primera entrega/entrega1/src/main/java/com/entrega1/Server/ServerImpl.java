@@ -134,7 +134,7 @@ public class ServerImpl {
         for (int j = 0; j < ofertasDht.size(); j++) {
             if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
-                    res = res + ofertasDht.get(j) + "_" + solicitud;
+                    res = ofertasDht.get(j) + "_" + solicitud;
                 }
             }
         }
@@ -160,7 +160,7 @@ public class ServerImpl {
     }
 
     public static boolean validarCriterios(Aspirante solicitud, Oferta vacante) {
-        if (vacante.getExperiencia() != solicitud.getExperiencia())
+        if (vacante.getExperiencia() > solicitud.getExperiencia())
             return false;
         if (vacante.getEstudios() != solicitud.getEstudios())
             return false;
