@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<data-set xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Servers>
+		<ServerName>sucesor</ServerName>
+		<ServerIP>tcp://25.12.51.131:1098</ServerIP>
+	</Servers>
+	<Servers>
+		<ServerName>antecesor</ServerName>
+		<ServerIP>tcp://25.12.51.131:1098</ServerIP>
+	</Servers>
+</data-set>

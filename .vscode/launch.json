@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch ServerImpl",
+            "request": "launch",
+            "mainClass": "com.entrega1.Server.ServerImpl",
+            "projectName": "entrega1"
+        },
+        {
+            "type": "java",
+            "name": "Launch ConfigureServer",
+            "request": "launch",
+            "mainClass": "com.entrega1.Server.ConfigureServer",
+            "projectName": "entrega1"
+        },
+        {
+            "type": "java",
             "name": "Launch filtro",
             "request": "launch",
             "mainClass": "com.entrega1.filtro",

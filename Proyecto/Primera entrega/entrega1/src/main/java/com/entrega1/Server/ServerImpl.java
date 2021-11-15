@@ -1,14 +1,6 @@
 package com.entrega1.Server;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-import java.rmi.*;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.function.BooleanSupplier;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,59 +8,209 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.rmi.RemoteException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
-/**
- *
- * @author usuario
- */
-public class ServerImpl extends UnicastRemoteObject implements Server {
-    ArrayList<Oferta> totalOfertas = new ArrayList<Oferta>();
-    ArrayList<Solicitud> totalSolicitudes = new ArrayList<Solicitud>();
+import com.entrega1.Server.Modelo.*;
 
-    ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
-    ArrayList<Solicitud> solicitudes = new ArrayList<Solicitud>();
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
-    public ServerImpl(String name) throws RemoteException {
-        super();
-        try {
-            System.out.println("Rebind Object " + name);
-            Naming.rebind(name, this);
+// public class ServerImpl implements Server{
+public class ServerImpl {
+    static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
+
+    static int serverId = 85;
+    static int sucesor = 170;
+    static int predecesor = 255;
+    static ZMQ.Socket server;
+    static ZMQ.Socket sucesorServer;
+    // static String sucesorIP = "tcp://25.12.51.131:1098";// cambiar ip
+
+    static String sucesorIP = "tcp://127.0.0.1:1102";
+    // static String sucesorIP = "tcp://127.0.0.1:1103";
+    // static String sucesorIP = "tcp://127.0.0.1:1101";
+    static ZMQ.Socket antecesorServer;
+    // static String antecesorIP = "tcp://25.12.51.131:1098";// cambiar ip
+
+    static String antecesorIP = "tcp://127.0.0.1:1103";
+    // static String antecesorIP = "tcp://127.0.0.1:1101";
+    // static String antecesorIP = "tcp://127.0.0.1:1102";
+
+    public static void main(String args[]) throws Exception {
+        inicializarDHT();
+        String key;
+
+        // System.out.println((StringToIntegerHash("1_1") / 5) % 3);
+
+        try (ZContext context = new ZContext()) {
+            System.out.println("Corriendo servidor " + serverId + " ...");
+
+            // Socket con filtro
+            server = context.createSocket(SocketType.REP);
+            // server.bind("tcp://*:1101");
+            server.bind("tcp://*:1101");
+            // server.bind("tcp://*:1103");
+
+            // Socket con sucesor
+            sucesorServer = context.createSocket(SocketType.REQ);
+            sucesorServer.connect(sucesorIP);
+
+            // Socket con antecesor
+            antecesorServer = context.createSocket(SocketType.REP);
+            antecesorServer.connect(sucesorIP);
+
+            while (!Thread.currentThread().isInterrupted()) {
+                String msjRecibido = server.recvStr(0).trim();
+                StringTokenizer tokenMsj = new StringTokenizer(msjRecibido, "-");
+                String tipoMsj = tokenMsj.nextToken();
+                if (tipoMsj.equals("Oferta")) {
+                    String ofertaStr = msjRecibido.substring(msjRecibido.indexOf("-") + 1);
+                    Oferta ofertaRecibida = new Oferta();
+                    StringTokenizer tokenOferta = new StringTokenizer(ofertaStr, "-");
+                    ofertaRecibida.setId(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setIdSector(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setIdEmpleador(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setDescripcion(tokenOferta.nextToken());
+                    ofertaRecibida.setCargo(tokenOferta.nextToken());
+                    ofertaRecibida.setSueldo(Integer.valueOf(tokenOferta.nextToken()));
+
+                    String response = grabarOferta(ofertaRecibida, ofertaStr);
+                    server.send(response.getBytes(ZMQ.CHARSET), 0);
+                    System.out.println("--------------------------");
+                    System.out.println("Oferta Respuesta: " + response + " ; Enviada al Filtro");
+                    System.out.println("--------------------------");
+                } else if (tipoMsj.equals("Aspirante")) {
+                    String solicitudStr = msjRecibido.substring(msjRecibido.indexOf("-") + 1);
+                    StringTokenizer tokenSolicitud = new StringTokenizer(solicitudStr, "-");
+                    Aspirante solicitudRecibida = new Aspirante();
+                    solicitudRecibida.setIdAspirante(Integer.valueOf(tokenSolicitud.nextToken()));
+                    solicitudRecibida.setNombre(tokenSolicitud.nextToken());
+                    solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
+                    solicitudRecibida.setExperiencia(Integer.valueOf(tokenSolicitud.nextToken()));
+                    solicitudRecibida.setEstudios(tokenSolicitud.nextToken());
+                    solicitudRecibida.setHabilidades(tokenSolicitud.nextToken());
+
+                    String response = verificarVacantes(solicitudRecibida);
+                    server.send(response.getBytes(ZMQ.CHARSET), 0);
+                    System.out.println("--------------------------");
+                    System.out.println("Aspirante Respuesta: " + response + " ; Enviada al Filtro");
+                    System.out.println("--------------------------");
+                }
+                Thread.sleep(1000);
+            }
         } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println(" System exception: " + e);
         }
     }
 
-    @Override
-    public String prueba() throws RemoteException {
-        try {
-            return ("holiaaaaaa");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ("error");
+    public static String grabarOferta(Oferta oferta, String ofertaStr) {
+        int key = Math.abs(ofertaStr.hashCode());
+        key = key % 256;
+        String response;
+        int lowRange = predecesor > serverId ? 0 : predecesor;
+        if (lowRange < key && key <= serverId) {
+            guardarEnDHT(Integer.toString(key), oferta);
+            response = "Llave: " + key + "; Oferta: " + ofertaStr + " OK en el servidor (" + serverId + ")";
+        } else {
+            response = "Oferta " + ofertaStr + " NO va en el servidor (" + serverId + ")";
         }
+        return response;
     }
 
-    public void almacenarOfertas(ArrayList<Oferta> ofertas){
-
+    public static String verificarVacantes(Aspirante solicitud) {
+        ArrayList<Oferta> ofertasDht = new ArrayList<>(ht.values());
+        String res = "";
+        for (int j = 0; j < ofertasDht.size(); j++) {
+            if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
+                if (validarCriterios(solicitud, ofertasDht.get(j))) {
+                    res = res + ofertasDht.get(j) + "_" + solicitud + "|";
+                }
+            }
+        }
+        System.out.println(res);
+        return res;
     }
 
-    public int getNumeroOfertasDHT(){
-        //
-        return 0;
+    public static String verificarVacantes2(ArrayList<Aspirante> solicitudes) {
+        // Hashtable<String, Oferta> dht = getDHT();
+        ArrayList<Oferta> ofertasDht = new ArrayList<>(ht.values());
+        String res = "";
+        for (int i = 0; i < solicitudes.size(); i++) {
+            for (int j = 0; j < ofertasDht.size(); j++) {
+                if (ofertasDht.get(j).getIdSector() == solicitudes.get(i).getIdSector()) {
+                    if (validarCriterios(solicitudes.get(i), ofertasDht.get(j))) {
+                        res = res + ofertasDht.get(j) + "_" + solicitudes.get(i) + "|";
+                    }
+                }
+            }
+        }
+        System.out.println(res);
+        return res;
     }
 
-    public void buscarVacante(){
-        //
+    public static boolean validarCriterios(Aspirante solicitud, Oferta vacante) {
+        if (vacante.getExperiencia() != solicitud.getExperiencia())
+            return false;
+        if (vacante.getEstudios() != solicitud.getEstudios())
+            return false;
+        if (vacante.getHabilidades() != solicitud.getHabilidades())
+            return false;
+        return true;
     }
 
-    public void notificarEmpleador(){
+    // funcion que notifica a los aspirantes que si hay vacantes en ofertas
+    // public static void cumpleCriterios(Solicitud solicitud, Oferta vacante) {}
 
+    // funcion que notifica a los aspirantes que no hay vacantes en ofertas
+    // public static void noCumpleCriterios(Solicitud solicitud, Oferta vacante) {}
+
+    // esta invocaria a cumple criterios o no cumple criterios
+    // public static void notificarAspirante(boolean cumple) {}
+
+    // TODO esta guardando datos duplicados, no deberia por que es hashtable xd
+    // esta mal no lee el fichero
+    public static boolean guardarEnDHT(String key, Oferta value) {
+        ht.put(key, value);
+        System.out.println("Nueva HT:");
+        System.out.println(ht);
+        // FileOutputStream fos = null;
+        // ObjectOutputStream salida = null;
+        // try {
+        // PrintWriter pw = new PrintWriter(new File("Proyecto/Primera
+        // entrega/entrega1/ofertas"));
+        // pw.write("");
+        // pw.close();
+        // fos = new FileOutputStream("Proyecto/Primera entrega/entrega1/ofertas",
+        // true);
+        // salida = new ObjectOutputStream(fos);
+        // salida.writeObject(ht);
+        // salida.close();
+        // fos.close();
+        // } catch (Exception e) {
+        // System.out.println("Error guardarEnDHT: " + e.getMessage());
+        // return false;
+        // }
+        return true;
     }
 
-    public void notificarAspirante(){
-
+    public static void inicializarDHT() {
+        // try {
+        // FileInputStream fi = new FileInputStream(new File("Proyecto/Primera
+        // entrega/entrega1/ofertas"));
+        // ObjectInputStream oi = new ObjectInputStream(fi);
+        // ht = (Hashtable<String, Oferta>) oi.readObject();
+        // System.out.println(ht);
+        // } catch (Exception e) {
+        // System.out.println("Error inicializarDHT: " + e.getMessage());
+        // }
     }
 }
