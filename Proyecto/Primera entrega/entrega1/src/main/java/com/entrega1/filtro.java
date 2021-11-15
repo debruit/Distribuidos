@@ -1,6 +1,14 @@
 package com.entrega1;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.nio.channels.ClosedSelectorException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.zeromq.SocketType;
@@ -19,12 +27,19 @@ import org.zeromq.ZMQ;
  */
 public class filtro {
 
+    static String[] serversIps = { "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103" };
+    // static String[] serversIps = { "tcp://25.83.21.137:1101",
+    // "tcp://25.12.51.131:1102", "tcp://127.0.0.1:1103" };
+    static String aspiranteIp = "";
+    static String empleadorIp = "";
+
     public static void main(String args[]) {
 
         ArrayList<Aspirante> solicitudes = new ArrayList<Aspirante>();
         String solicitudServer = "", sector = "";
 
-        ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
+        // ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
+        ArrayList<Oferta> ofertas = getBackupOfertas();
         String ofertaServer = "";
 
         boolean doneOferta = false, doneSolicitud = false;
@@ -123,12 +138,19 @@ public class filtro {
         temp.setExperiencia(Integer.valueOf(token.nextToken()));
         temp.setIdSector(Integer.valueOf(token.nextToken()));
         solicitudes.add(temp);
+        setBackupAspirantes(solicitudes);
 
         if (solicitudes.size() > 0) {
 
-            ZMQ.Socket server = context.createSocket(SocketType.REQ);
+            // ZMQ.Socket server = context.createSocket(SocketType.REQ);
+            ZMQ.Socket server1 = context.createSocket(SocketType.REQ);
+            ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
+            ZMQ.Socket server3 = context.createSocket(SocketType.REQ);
             // server.connect("tcp://25.12.51.131:1098");
-            server.connect("tcp://127.0.0.1:1098");
+            // server.connect("tcp://127.0.0.1:1098");
+            server1.connect(serversIps[0]);
+            server2.connect(serversIps[1]);
+            server3.connect(serversIps[2]);
             for (int i = 0; i < solicitudes.size(); i++) {
 
                 sector = solicitudes.get(i).getHabilidades();
@@ -142,7 +164,10 @@ public class filtro {
                             solicitudes.get(i).getEstudios(), solicitudes.get(i).getExperiencia(),
                             solicitudes.get(i).getIdSector());
 
-                    server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    // server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server1.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Cientifico") || sector.contains("Fisico")) {
                     System.out.println("Sector: PROFESIONALES CIENTIFICOS E INTELECTUALES");
 
@@ -151,7 +176,10 @@ public class filtro {
                             solicitudes.get(i).getEstudios(), solicitudes.get(i).getExperiencia(),
                             solicitudes.get(i).getIdSector());
 
-                    server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    // server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server1.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Ingeniero") || sector.contains("Tecnico") || sector.contains("Operario")
                         || sector.contains("Asistente")) {
                     System.out.println("Sector: TECNICOS Y PROFESIONALES");
@@ -161,7 +189,10 @@ public class filtro {
                             solicitudes.get(i).getEstudios(), solicitudes.get(i).getExperiencia(),
                             solicitudes.get(i).getIdSector());
 
-                    server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    // server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server1.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Administrativo") || sector.contains("Secretaria")
                         || sector.contains("Recepcionista") || sector.contains("Auxiliar")) {
                     System.out.println("Sector: PERSONAL DE APOYO ADMNISTRATIVO");
@@ -171,7 +202,10 @@ public class filtro {
                             solicitudes.get(i).getEstudios(), solicitudes.get(i).getExperiencia(),
                             solicitudes.get(i).getIdSector());
 
-                    server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    // server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server1.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
                 } else if (sector.contains("Agricultor") || sector.contains("Pesquero")) {
                     System.out.println("Sector: AGRICULTORES FORESTALES Y PESQUEROS");
 
@@ -180,13 +214,24 @@ public class filtro {
                             solicitudes.get(i).getEstudios(), solicitudes.get(i).getExperiencia(),
                             solicitudes.get(i).getIdSector());
 
-                    server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    // server.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server1.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+                    server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
                 }
-                byte[] reply = server.recv(0);
+                // byte[] reply = server.recv(0);
+                byte[] reply1 = server1.recv(0);
+                byte[] reply2 = server2.recv(0);
+                byte[] reply3 = server3.recv(0);
 
-                System.out.println(new String(reply, ZMQ.CHARSET));
+                // System.out.println(new String(reply, ZMQ.CHARSET));
+                System.out.println(new String(reply1, ZMQ.CHARSET));
+                System.out.println(new String(reply2, ZMQ.CHARSET));
+                System.out.println(new String(reply3, ZMQ.CHARSET));
+                System.out.println();
             }
             solicitudes.clear();
+            clearBackupAspirantes();
         }
         return true;
     }
@@ -201,6 +246,7 @@ public class filtro {
         temp2.setCargo(token.nextToken());
         temp2.setSueldo(Integer.valueOf(token.nextToken()));
         ofertas.add(temp2);
+        setBackupOfertas(ofertas);
 
         if (ofertas.size() > 0) {
             // ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
@@ -209,9 +255,9 @@ public class filtro {
             ZMQ.Socket server23 = context.createSocket(SocketType.REQ);
             // server2.connect("tcp://25.12.51.131:1098");
             // server2.connect("tcp://127.0.0.1:1098");
-            server21.connect("tcp://127.0.0.1:1101");
-            server22.connect("tcp://127.0.0.1:1102");
-            server23.connect("tcp://127.0.0.1:1103");
+            server21.connect(serversIps[0]);
+            server22.connect(serversIps[1]);
+            server23.connect(serversIps[2]);
             for (int i = 0; i < ofertas.size(); i++) {
 
                 sector = ofertas.get(i).getCargo();
@@ -297,9 +343,98 @@ public class filtro {
                 System.out.println();
 
             }
+            clearBackupOfertas();
             ofertas.clear();
         }
         return true;
 
     }
+
+    public static void setBackupOfertas(ArrayList<Oferta> ofertas) {
+        try {
+            FileOutputStream fos = new FileOutputStream("Proyecto\\Primera entrega\\entrega1\\OfertasBk.txt");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
+            objectOutputStream.writeInt(ofertas.size());
+            for (Oferta oferta : ofertas) {
+                objectOutputStream.writeObject(oferta);
+            }
+        } catch (Exception e) {
+            System.out.println("Exception guardarEnBackup: " + e.getMessage());
+        }
+    }
+
+    public static void setBackupAspirantes(ArrayList<Aspirante> solicitudes) {
+        try {
+            FileOutputStream fos = new FileOutputStream("Proyecto\\Primera entrega\\entrega1\\AspirantesBk.txt");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
+            objectOutputStream.writeInt(solicitudes.size());
+            for (Aspirante oferta : solicitudes) {
+                objectOutputStream.writeObject(oferta);
+            }
+        } catch (Exception e) {
+            System.out.println("Exception guardarEnBackup: " + e.getMessage());
+        }
+    }
+
+    public static ArrayList<Oferta> getBackupOfertas() {
+        ArrayList<Oferta> res = new ArrayList<>();
+        try {
+            FileInputStream fileInputStream = new FileInputStream("Proyecto\\Primera entrega\\entrega1\\OfertasBk.txt");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            int trainCount = objectInputStream.readInt();
+            for (int i = 0; i < trainCount; i++) {
+                res.add((Oferta) objectInputStream.readObject());
+            }
+            System.out.println("Se recuperó de backup: ");
+            System.out.println(res);
+            fileInputStream.close();
+            objectInputStream.close();
+        } catch (Exception e) {
+            System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+        }
+        return res;
+    }
+
+    public static ArrayList<Aspirante> getBackupAspirantes() {
+        ArrayList<Aspirante> res = new ArrayList<>();
+        try {
+            FileInputStream fileInputStream = new FileInputStream(
+                    "Proyecto\\Primera entrega\\entrega1\\AspirantesBk.txt");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            int trainCount = objectInputStream.readInt();
+            for (int i = 0; i < trainCount; i++) {
+                res.add((Aspirante) objectInputStream.readObject());
+            }
+            System.out.println("Se recuperó de backup: ");
+            System.out.println(res);
+            fileInputStream.close();
+            objectInputStream.close();
+        } catch (Exception e) {
+            System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+        }
+        return res;
+    }
+
+    public static void clearBackupOfertas() {
+        try {
+            FileWriter fw = new FileWriter("Proyecto\\Primera entrega\\entrega1\\OfertasBk.txt", false);
+            PrintWriter pw = new PrintWriter(fw, false);
+            pw.flush();
+            pw.close();
+        } catch (Exception e) {
+            System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+        }
+    }
+
+    public static void clearBackupAspirantes() {
+        try {
+            FileWriter fw = new FileWriter("Proyecto\\Primera entrega\\entrega1\\AspirantesBk.txt", false);
+            PrintWriter pw = new PrintWriter(fw, false);
+            pw.flush();
+            pw.close();
+        } catch (Exception e) {
+            System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+        }
+    }
+
 }

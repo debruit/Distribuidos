@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Oferta implements Serializable {
     int id;
-    String idSector;
+    int idSector;
     int idEmpleador;
     String descripcion;
     String cargo;
@@ -14,8 +14,8 @@ public class Oferta implements Serializable {
     String estudios;
     String habilidades;
 
-    public Oferta(int id, String idSector, int idEmpleador, String descripcion, String cargo, int sueldo,
-            int experiencia, String estudios, String habilidades) {
+    public Oferta(int id, int idSector, int idEmpleador, String descripcion, String cargo, int sueldo, int experiencia,
+            String estudios, String habilidades) {
         this.id = id;
         this.idSector = idSector;
         this.idEmpleador = idEmpleador;
@@ -78,11 +78,11 @@ public class Oferta implements Serializable {
         this.id = id;
     }
 
-    public String getIdSector() {
+    public int getIdSector() {
         return idSector;
     }
 
-    public void setIdSector(String idSector) {
+    public void setIdSector(int idSector) {
         this.idSector = idSector;
     }
 

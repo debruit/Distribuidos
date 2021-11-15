@@ -75,5 +75,20 @@ public class RegistradorEmpleador {
         } catch (Exception e) {
             System.err.println(" System exception: " + e);
         }
+        try (ZContext context = new ZContext()) {
+            ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+            subscriber.connect("tcp://127.0.0.1:4099");
+
+            // Id del sector
+            String respuesta = "0";
+
+            subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
+
+            String mensaje = subscriber.recvStr(0).trim();
+
+            System.out.println("Mensaje recibido: " + mensaje);
+        } catch (Exception e) {
+            System.err.println(" System exception: " + e);
+        }
     }
 }

@@ -1,4 +1,5 @@
 package com.entrega1;
+
 import java.io.Serializable;
 
 /*
@@ -29,8 +30,14 @@ public class Oferta implements Serializable {
         this.sueldo = sueldo;
     }
 
-    public Oferta(){
-        
+    public Oferta() {
+
+    }
+
+    @Override
+    public String toString() {
+        return "id:" + id + "-idSector:" + idSector + "-idEmpleador:" + idEmpleador + "-descripcion:" + descripcion
+                + "-cargo:" + cargo + "-sueldo:" + sueldo + "\n";
     }
 
     public int getId() {
@@ -80,6 +87,5 @@ public class Oferta implements Serializable {
     public void setSueldo(int sueldo) {
         this.sueldo = sueldo;
     }
-
 
 }

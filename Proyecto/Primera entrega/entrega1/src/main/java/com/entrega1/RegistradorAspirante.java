@@ -26,7 +26,7 @@ public class RegistradorAspirante {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("solicitudes.txt");
+                File file = new File("Proyecto\\Primera entrega\\entrega1\\solicitudes.txt");
                 Scanner myReader = new Scanner(file);
                 Aspirante solicitud = new Aspirante();
                 filtro = 0;
@@ -58,7 +58,7 @@ public class RegistradorAspirante {
                 ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
                 subscriber.connect("tcp://127.0.0.1:2099");
 
-                //for de todos los aspirantes
+                // for de todos los aspirantes
 
                 // Id del sector
                 String respuesta = "0";
@@ -67,7 +67,7 @@ public class RegistradorAspirante {
 
                 String mensaje = subscriber.recvStr(0).trim();
 
-                //Evalua la vacante y responde
+                // Evalua la vacante y responde
                 ZMQ.Socket respuestaSocket = context.createSocket(SocketType.PUB);
                 respuestaSocket.bind("tcp://*:3099");
                 respuestaSocket.bind("ipc://respuesta");
@@ -78,7 +78,7 @@ public class RegistradorAspirante {
 
                 int id = 0;
 
-                String respuestaAspirante = String.format("%d-%b",id,acepta);
+                String respuestaAspirante = String.format("%d-%b", id, acepta);
                 respuestaSocket.send(respuestaAspirante, 0);
 
                 // Thread.sleep(5000);

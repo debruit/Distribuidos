@@ -1,75 +1,82 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Launch ServerImpl",
-            "request": "launch",
-            "mainClass": "com.entrega1.Server.ServerImpl",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch ConfigureServer",
-            "request": "launch",
-            "mainClass": "com.entrega1.Server.ConfigureServer",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch filtro",
-            "request": "launch",
-            "mainClass": "com.entrega1.filtro",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch Server1",
-            "request": "launch",
-            "mainClass": "com.entrega1.Server1",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
-            "name": "Launch App",
-            "request": "launch",
-            "mainClass": "com.entrega1.App",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch RegistradorEmpleador",
-            "request": "launch",
-            "mainClass": "com.entrega1.RegistradorEmpleador",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch RegistradorServer",
-            "request": "launch",
-            "mainClass": "com.entrega1.RegistradorServer",
-            "projectName": "entrega1"
-        },
-        {
-            "type": "java",
-            "name": "Launch RegistradorClient",
-            "request": "launch",
-            "mainClass": "RegistradorClient"
-        },
-        {
-            "type": "java",
-            "name": "Launch RegistradorServer(1)",
-            "request": "launch",
-            "mainClass": "RegistradorServer"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch RegistradorAspirante",
+      "request": "launch",
+      "mainClass": "com.entrega1.RegistradorAspirante",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch ServerImpl",
+      "request": "launch",
+      "mainClass": "com.entrega1.Server.ServerImpl",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch ConfigureServer",
+      "request": "launch",
+      "mainClass": "com.entrega1.Server.ConfigureServer",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch filtro",
+      "request": "launch",
+      "mainClass": "com.entrega1.filtro",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch Server1",
+      "request": "launch",
+      "mainClass": "com.entrega1.Server1",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch Current File",
+      "request": "launch",
+      "mainClass": "${file}"
+    },
+    {
+      "type": "java",
+      "name": "Launch App",
+      "request": "launch",
+      "mainClass": "com.entrega1.App",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch RegistradorEmpleador",
+      "request": "launch",
+      "mainClass": "com.entrega1.RegistradorEmpleador",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch RegistradorServer",
+      "request": "launch",
+      "mainClass": "com.entrega1.RegistradorServer",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
+      "name": "Launch RegistradorClient",
+      "request": "launch",
+      "mainClass": "RegistradorClient"
+    },
+    {
+      "type": "java",
+      "name": "Launch RegistradorServer(1)",
+      "request": "launch",
+      "mainClass": "RegistradorServer"
+    }
+  ]
 }

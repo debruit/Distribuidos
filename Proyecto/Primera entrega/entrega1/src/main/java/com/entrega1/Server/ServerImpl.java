@@ -1,21 +1,7 @@
 package com.entrega1.Server;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import com.entrega1.Server.Modelo.*;
@@ -24,41 +10,35 @@ import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
-// public class ServerImpl implements Server{
 public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
+    // static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102",
+    // "tcp://127.0.0.1:1103", "tcp://*:1101" };
+    // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103",
+    // "tcp://127.0.0.1:1101", "tcp://*:1102" };
+    static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://*:1103" };
 
-    static int serverId = 255;
-    static int sucesor = 85;
-    static int predecesor = 170;
+    static int serverId = Integer.valueOf(info[0]);
+    static int sucesor = Integer.valueOf(info[1]);
+    static int predecesor = Integer.valueOf(info[2]);
+
     static ZMQ.Socket server;
+
     static ZMQ.Socket sucesorServer;
-    // static String sucesorIP = "tcp://25.12.51.131:1098";// cambiar ip
+    static String sucesorIP = info[3];
 
-    static String sucesorIP = "tcp://127.0.0.1:1101";
-    // static String sucesorIP = "tcp://127.0.0.1:1103";
-    // static String sucesorIP = "tcp://127.0.0.1:1101";
     static ZMQ.Socket antecesorServer;
-    // static String antecesorIP = "tcp://25.12.51.131:1098";// cambiar ip
-
-    static String antecesorIP = "tcp://127.0.0.1:1102";
-    // static String antecesorIP = "tcp://127.0.0.1:1101";
-    // static String antecesorIP = "tcp://127.0.0.1:1102";
+    static String antecesorIP = info[4];
 
     public static void main(String args[]) throws Exception {
         inicializarDHT();
-        String key;
-
-        // System.out.println((StringToIntegerHash("1_1") / 5) % 3);
 
         try (ZContext context = new ZContext()) {
             System.out.println("Corriendo servidor " + serverId + " ...");
 
             // Socket con filtro
             server = context.createSocket(SocketType.REP);
-            // server.bind("tcp://*:1101");
-            server.bind("tcp://*:1103");
-            // server.bind("tcp://*:1103");
+            server.bind(info[5]);
 
             // Socket con sucesor
             sucesorServer = context.createSocket(SocketType.REQ);
@@ -77,8 +57,8 @@ public class ServerImpl {
                     Oferta ofertaRecibida = new Oferta();
                     StringTokenizer tokenOferta = new StringTokenizer(ofertaStr, "-");
                     ofertaRecibida.setId(Integer.valueOf(tokenOferta.nextToken()));
-                    // ofertaRecibida.setIdSector(Integer.valueOf(tokenOferta.nextToken()));
-                    ofertaRecibida.setIdSector(tokenOferta.nextToken());
+                    ofertaRecibida.setIdSector(Integer.valueOf(tokenOferta.nextToken()));
+                    // ofertaRecibida.setIdSector(tokenOferta.nextToken());
                     ofertaRecibida.setIdEmpleador(Integer.valueOf(tokenOferta.nextToken()));
                     ofertaRecibida.setDescripcion(tokenOferta.nextToken());
                     ofertaRecibida.setCargo(tokenOferta.nextToken());
@@ -95,8 +75,8 @@ public class ServerImpl {
                     Aspirante solicitudRecibida = new Aspirante();
                     solicitudRecibida.setIdAspirante(Integer.valueOf(tokenSolicitud.nextToken()));
                     solicitudRecibida.setNombre(tokenSolicitud.nextToken());
-                    // solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
-                    solicitudRecibida.setIdSector(tokenSolicitud.nextToken());
+                    solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
+                    // solicitudRecibida.setIdSector(tokenSolicitud.nextToken());
                     solicitudRecibida.setExperiencia(Integer.valueOf(tokenSolicitud.nextToken()));
                     solicitudRecibida.setEstudios(tokenSolicitud.nextToken());
                     solicitudRecibida.setHabilidades(tokenSolicitud.nextToken());
@@ -143,7 +123,6 @@ public class ServerImpl {
     }
 
     public static String verificarVacantes2(ArrayList<Aspirante> solicitudes) {
-        // Hashtable<String, Oferta> dht = getDHT();
         ArrayList<Oferta> ofertasDht = new ArrayList<>(ht.values());
         String res = "";
         for (int i = 0; i < solicitudes.size(); i++) {
@@ -178,8 +157,6 @@ public class ServerImpl {
     // esta invocaria a cumple criterios o no cumple criterios
     // public static void notificarAspirante(boolean cumple) {}
 
-    // TODO esta guardando datos duplicados, no deberia por que es hashtable xd
-    // esta mal no lee el fichero
     public static boolean guardarEnDHT(String key, Oferta value) {
         ht.put(key, value);
         System.out.println("Nueva HT:");
