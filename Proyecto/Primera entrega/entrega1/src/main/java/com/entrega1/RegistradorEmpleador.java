@@ -26,7 +26,8 @@ public class RegistradorEmpleador {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("empleador.txt");
+                // File file = new File("empleador.txt");
+                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;
@@ -42,7 +43,8 @@ public class RegistradorEmpleador {
 
                     String oferta = String.format("%d-Oferta-%d-%d-%s-%s-%d-%d-%s-%s", filtro, consulta.getId(),
                             consulta.getIdEmpleador(), consulta.getDescripcion(), consulta.getCargo(),
-                            consulta.getSueldo(), consulta.getExperiencia(), consulta.getHabilidades(), consulta.getEstudios());
+                            consulta.getSueldo(), consulta.getExperiencia(), consulta.getHabilidades(),
+                            consulta.getEstudios());
 
                     empleador.send(oferta, 0);
 

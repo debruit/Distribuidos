@@ -12,9 +12,11 @@ import org.zeromq.ZMQ;
 
 public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
-    // static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102","tcp://127.0.0.1:1103", "tcp://*:1101" };
-    // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103","tcp://127.0.0.1:1101", "tcp://*:1102" };
-    static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://*:1103" };
+    static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103", "tcp://*:1101" };
+    // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103",
+    // "tcp://127.0.0.1:1101", "tcp://*:1102" };
+    // static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101",
+    // "tcp://127.0.0.1:1102", "tcp://*:1103" };
 
     static int serverId = Integer.valueOf(info[0]);
     static int sucesor = Integer.valueOf(info[1]);
@@ -73,11 +75,10 @@ public class ServerImpl {
                     Aspirante solicitudRecibida = new Aspirante();
                     solicitudRecibida.setIdAspirante(Integer.valueOf(tokenSolicitud.nextToken()));
                     solicitudRecibida.setNombre(tokenSolicitud.nextToken());
-                    solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
-                    // solicitudRecibida.setIdSector(tokenSolicitud.nextToken());
-                    solicitudRecibida.setExperiencia(Integer.valueOf(tokenSolicitud.nextToken()));
-                    solicitudRecibida.setEstudios(tokenSolicitud.nextToken());
                     solicitudRecibida.setHabilidades(tokenSolicitud.nextToken());
+                    solicitudRecibida.setEstudios(tokenSolicitud.nextToken());
+                    solicitudRecibida.setExperiencia(Integer.valueOf(tokenSolicitud.nextToken()));
+                    solicitudRecibida.setIdSector(Integer.valueOf(tokenSolicitud.nextToken()));
 
                     String response = verificarVacantes(solicitudRecibida);
                     server.send(response.getBytes(ZMQ.CHARSET), 0);
@@ -108,27 +109,11 @@ public class ServerImpl {
 
     public static String verificarVacantes(Aspirante solicitud) {
         ArrayList<Oferta> ofertasDht = new ArrayList<>(ht.values());
-        String res = "";
+        String res = "No se encontraron match";
         for (int j = 0; j < ofertasDht.size(); j++) {
             if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
                     res = ofertasDht.get(j) + "_" + solicitud;
-                }
-            }
-        }
-        System.out.println(res);
-        return res;
-    }
-
-    public static String verificarVacantes2(ArrayList<Aspirante> solicitudes) {
-        ArrayList<Oferta> ofertasDht = new ArrayList<>(ht.values());
-        String res = "";
-        for (int i = 0; i < solicitudes.size(); i++) {
-            for (int j = 0; j < ofertasDht.size(); j++) {
-                if (ofertasDht.get(j).getIdSector() == solicitudes.get(i).getIdSector()) {
-                    if (validarCriterios(solicitudes.get(i), ofertasDht.get(j))) {
-                        res = res + ofertasDht.get(j) + "_" + solicitudes.get(i) + "|";
-                    }
                 }
             }
         }

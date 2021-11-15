@@ -5,14 +5,14 @@ Profesional en ingeniería de software
 Ingeniero en sistemas
 /
 Juan
-1
-Profesional en ingeniería de software
-2
+5
+Profesional
+6
 Cientifico
 /
 Rizo
 1
-Profesional en ingeniería de software
+Profesional
 2
 Pesquero
 /
