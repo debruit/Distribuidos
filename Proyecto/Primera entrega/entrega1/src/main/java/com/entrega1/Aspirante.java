@@ -16,14 +16,19 @@ public class Aspirante implements Serializable {
     // atributos
     int idAspirante;
     String nombre;
-    ArrayList<Integer> idSector;
+    int idSector;
+    // ArrayList<Integer> idSectores;
     int experiencia;
-    boolean estudios;
-    boolean habilidades;
+    String estudios;
+    String habilidades;
     ArrayList<Boolean> ofertasAceptadas;
+
+    public Aspirante(){
+
+    }
     
-    public Aspirante(int idAspirante, String nombre, ArrayList<Integer> idSector, int experiencia, boolean estudios,
-            boolean habilidades, ArrayList<Boolean> ofertasAceptadas) {
+    public Aspirante(int idAspirante, String nombre, int idSector, int experiencia, String estudios,
+    String habilidades, ArrayList<Boolean> ofertasAceptadas) {
         this.idAspirante = idAspirante;
         this.nombre = nombre;
         this.idSector = idSector;
@@ -49,11 +54,11 @@ public class Aspirante implements Serializable {
         this.nombre = nombre;
     }
 
-    public ArrayList<Integer> getIdSector() {
+    public int getIdSector() {
         return idSector;
     }
 
-    public void setIdSector(ArrayList<Integer> idSector) {
+    public void setIdSector(int idSector) {
         this.idSector = idSector;
     }
 
@@ -65,19 +70,19 @@ public class Aspirante implements Serializable {
         this.experiencia = experiencia;
     }
 
-    public boolean isEstudios() {
+    public String isEstudios() {
         return estudios;
     }
 
-    public void setEstudios(boolean estudios) {
+    public void setEstudios(String estudios) {
         this.estudios = estudios;
     }
 
-    public boolean isHabilidades() {
+    public String isHabilidades() {
         return habilidades;
     }
 
-    public void setHabilidades(boolean habilidades) {
+    public void setHabilidades(String habilidades) {
         this.habilidades = habilidades;
     }
 
@@ -88,6 +93,20 @@ public class Aspirante implements Serializable {
     public void setOfertasAceptadas(ArrayList<Boolean> ofertasAceptadas) {
         this.ofertasAceptadas = ofertasAceptadas;
     }
+
+    // public void addSector(int sector) {
+    //     this.idSector.add(sector);
+    // }
+
+    public String getEstudios() {
+        return estudios;
+    }
+
+    public String getHabilidades() {
+        return habilidades;
+    }
+
+    
 
    
 
