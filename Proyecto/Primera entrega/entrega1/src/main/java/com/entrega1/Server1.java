@@ -59,7 +59,7 @@ public class Server1 {
                         Oferta temp = new Oferta();
 
                         temp.setId(Integer.valueOf(token.nextToken()));
-                        temp.setSector(token.nextToken());
+                        temp.setSector(Integer.valueOf(token.nextToken()));
                         temp.setIdEmpleador(Integer.valueOf(token.nextToken()));
                         temp.setDescripcion(token.nextToken());
                         temp.setCargo(token.nextToken());

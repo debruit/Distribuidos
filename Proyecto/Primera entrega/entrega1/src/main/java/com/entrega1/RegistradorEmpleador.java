@@ -2,6 +2,7 @@ package com.entrega1;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.zeromq.SocketType;
@@ -17,6 +18,7 @@ public class RegistradorEmpleador {
     public static void main(String args[]) {
 
         int filtro, i = 0;
+        ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
 
         try (ZContext context = new ZContext()) {
             ZMQ.Socket empleador = context.createSocket(SocketType.PUB);
@@ -46,9 +48,25 @@ public class RegistradorEmpleador {
                         i++;
                     }
 
+                    ofertas.add(consulta);
+
                     Thread.sleep(1000);
                 }
                 myReader.close();
+
+                // for de los empleadores para notificar
+
+                ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
+                subscriber.connect("tcp://127.0.0.1:4099");
+
+                // Id del sector
+                String respuesta = "0";
+
+                subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
+
+                String mensaje = subscriber.recvStr(0).trim();
+
+                System.out.println("Mensaje recibido: " + mensaje);
             } catch (FileNotFoundException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();

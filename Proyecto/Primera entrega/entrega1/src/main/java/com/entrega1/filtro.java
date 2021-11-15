@@ -27,6 +27,8 @@ public class filtro {
         ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
         String ofertaServer = "";
 
+        boolean doneOferta = false, doneSolicitud = false;
+
         try (ZContext context = new ZContext()) {
             System.out.println("Corriendo filtro...");
             ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
@@ -46,9 +48,13 @@ public class filtro {
                 Integer.valueOf(token.nextToken());
 
                 if (token.nextToken().equals("Aspirante")) {
-                    agregarSolicitud(token, solicitudes, context, sector, solicitudServer);
+                    doneSolicitud = agregarSolicitud(token, solicitudes, context, sector, solicitudServer);
                 } else {
-                    agregarOferta(token, ofertas, context, sector, ofertaServer);
+                    doneOferta = agregarOferta(token, ofertas, context, sector, ofertaServer);
+                }
+
+                if (doneSolicitud && doneOferta) {
+                    notificaciones(context);
                 }
 
             }
@@ -58,7 +64,55 @@ public class filtro {
         }
     }
 
-    public static void agregarSolicitud(StringTokenizer token, ArrayList<Aspirante> solicitudes, ZContext context,
+    public static void notificaciones(ZContext context) {
+        // Request a todos los servidores por vacantes
+        // Respuesta de todos los servidores
+        byte[] reply1 = null;// server21.recv(0);
+        String hayVacante = new String(reply1, ZMQ.CHARSET);
+        if (hayVacante.contains("1")) {
+            ZMQ.Socket vacante = context.createSocket(SocketType.PUB);
+            vacante.bind("tcp://*:2099");
+            vacante.bind("ipc://vacante");
+
+            // Tokenizar la respuesta del servidor
+
+            // Id del sector y oferta de la vacante(Sale de la tokenizacion)
+            int idSector = 0, idOferta = 0;
+            // Construir el mensaje de la vacante a enviar al aspirante
+            String vacanteSector = String.format("%d-%s", idSector);
+            vacante.send(vacanteSector, 0);
+
+            // Respuesta del aspirante
+            ZMQ.Socket respuestaSocket = context.createSocket(SocketType.SUB);
+            respuestaSocket.connect("tcp://127.0.0.1:3099");
+
+            //
+            String acepta = "0";
+
+            respuestaSocket.subscribe(acepta.getBytes(ZMQ.CHARSET));
+
+            String response = respuestaSocket.recvStr(0).trim();
+
+            String acepto = "";
+
+            ZMQ.Socket respuestaEmpleador = context.createSocket(SocketType.PUB);
+            respuestaEmpleador.bind("tcp://*:4099");
+            respuestaEmpleador.bind("ipc://empleador");
+
+            if (response.contains("y")) {
+                acepto = "Aceptó la oferta";
+            } else {
+                acepto = "Rechazó la oferta";
+            }
+
+            int idEmpleador = 0;
+            // Construir el mensaje de la notificacion a enviar al empleador
+            String responseEmpleador = String.format("%d-El aspirante: -%s-%d", idEmpleador, acepto, idOferta);
+            respuestaEmpleador.send(responseEmpleador, 0);
+        }
+    }
+
+    public static boolean agregarSolicitud(StringTokenizer token, ArrayList<Aspirante> solicitudes, ZContext context,
             String sector, String solicitudServer) {
         Aspirante temp = new Aspirante();
 
@@ -70,7 +124,7 @@ public class filtro {
         temp.setIdSector(Integer.valueOf(token.nextToken()));
         solicitudes.add(temp);
 
-        if (solicitudes.size() > 1) {
+        if (solicitudes.size() > 0) {
 
             ZMQ.Socket server = context.createSocket(SocketType.REQ);
             // server.connect("tcp://25.12.51.131:1098");
@@ -132,11 +186,13 @@ public class filtro {
 
                 System.out.println(new String(reply, ZMQ.CHARSET));
             }
+            solicitudes.clear();
         }
+        return true;
     }
 
-    public static void agregarOferta(StringTokenizer token, ArrayList<Oferta> ofertas, ZContext context, String sector,
-            String ofertaServer) {
+    public static boolean agregarOferta(StringTokenizer token, ArrayList<Oferta> ofertas, ZContext context,
+            String sector, String ofertaServer) {
         Oferta temp2 = new Oferta();
 
         temp2.setId(Integer.valueOf(token.nextToken()));
@@ -164,10 +220,10 @@ public class filtro {
                         || sector.contains("Supervisor") || sector.contains("Jefe")) {
                     System.out.println("Sector: DIRECTORES Y GERENTES");
 
-                    ofertas.get(i).setSector("DIRECTORES Y GERENTES");
+                    ofertas.get(i).setSector(1);
 
-                    ofertaServer = String.format("Oferta-%d-%s-%d-%s-%s-%d", ofertas.get(i).getId(),
-                            ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                            ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -177,10 +233,10 @@ public class filtro {
                 } else if (sector.contains("Cientifico") || sector.contains("Fisico")) {
                     System.out.println("Sector: PROFESIONALES CIENTIFICOS E INTELECTUALES");
 
-                    ofertas.get(i).setSector("PROFESIONALES CIENTIFICOS E INTELECTUALES");
+                    ofertas.get(i).setSector(2);
 
-                    ofertaServer = String.format("Oferta-%d-%s-%d-%s-%s-%d", ofertas.get(i).getId(),
-                            ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                            ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -191,10 +247,10 @@ public class filtro {
                         || sector.contains("Asistente")) {
                     System.out.println("Sector: TECNICOS Y PROFESIONALES");
 
-                    ofertas.get(i).setSector("TECNICOS Y PROFESIONALES");
+                    ofertas.get(i).setSector(3);
 
-                    ofertaServer = String.format("Oferta-%d-%s-%d-%s-%s-%d", ofertas.get(i).getId(),
-                            ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                            ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -205,10 +261,10 @@ public class filtro {
                         || sector.contains("Recepcionista") || sector.contains("Auxiliar")) {
                     System.out.println("Sector: PERSONAL DE APOYO ADMNISTRATIVO");
 
-                    ofertas.get(i).setSector("PERSONAL DE APOYO ADMNISTRATIVO");
+                    ofertas.get(i).setSector(4);
 
-                    ofertaServer = String.format("Oferta-%d-%s-%d-%s-%s-%d", ofertas.get(i).getId(),
-                            ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                            ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -218,10 +274,10 @@ public class filtro {
                 } else if (sector.contains("Agricultor") || sector.contains("Pesquero")) {
                     System.out.println("Sector: AGRICULTORES FORESTALES Y PESQUEROS");
 
-                    ofertas.get(i).setSector("AGRICULTORES FORESTALES Y PESQUEROS");
+                    ofertas.get(i).setSector(5);
 
-                    ofertaServer = String.format("Oferta-%d-%s-%d-%s-%s-%d", ofertas.get(i).getId(),
-                            ofertas.get(i).getSector(), ofertas.get(i).getIdEmpleador(),
+                    ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d", ofertas.get(i).getId(),
+                            ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
                             ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -243,6 +299,7 @@ public class filtro {
             }
             ofertas.clear();
         }
+        return true;
 
     }
 }
