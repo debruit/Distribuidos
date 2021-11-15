@@ -363,7 +363,7 @@ public class filtro {
 
     public static void setBackupOfertas(ArrayList<Oferta> ofertas) {
         try {
-            FileOutputStream fos = new FileOutputStream("Proyecto\\Primera entrega\\entrega1\\OfertasBk.txt");
+            FileOutputStream fos = new FileOutputStream("OfertasBk.txt");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
             objectOutputStream.writeInt(ofertas.size());
             for (Oferta oferta : ofertas) {
@@ -376,7 +376,7 @@ public class filtro {
 
     public static void setBackupAspirantes(ArrayList<Aspirante> solicitudes) {
         try {
-            FileOutputStream fos = new FileOutputStream("Proyecto\\Primera entrega\\entrega1\\AspirantesBk.txt");
+            FileOutputStream fos = new FileOutputStream("AspirantesBk.txt");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
             objectOutputStream.writeInt(solicitudes.size());
             for (Aspirante oferta : solicitudes) {
@@ -390,7 +390,7 @@ public class filtro {
     public static ArrayList<Oferta> getBackupOfertas() {
         ArrayList<Oferta> res = new ArrayList<>();
         try {
-            FileInputStream fileInputStream = new FileInputStream("Proyecto\\Primera entrega\\entrega1\\OfertasBk.txt");
+            FileInputStream fileInputStream = new FileInputStream("OfertasBk.txt");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             int trainCount = objectInputStream.readInt();
             for (int i = 0; i < trainCount; i++) {
@@ -410,7 +410,7 @@ public class filtro {
         ArrayList<Aspirante> res = new ArrayList<>();
         try {
             FileInputStream fileInputStream = new FileInputStream(
-                    "Proyecto\\Primera entrega\\entrega1\\AspirantesBk.txt");
+                    "AspirantesBk.txt");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             int trainCount = objectInputStream.readInt();
             for (int i = 0; i < trainCount; i++) {
@@ -428,7 +428,7 @@ public class filtro {
 
     public static void clearBackupOfertas() {
         try {
-            FileWriter fw = new FileWriter("Proyecto\\Primera entrega\\entrega1\\OfertasBk.txt", false);
+            FileWriter fw = new FileWriter("OfertasBk.txt", false);
             PrintWriter pw = new PrintWriter(fw, false);
             pw.flush();
             pw.close();
@@ -439,7 +439,7 @@ public class filtro {
 
     public static void clearBackupAspirantes() {
         try {
-            FileWriter fw = new FileWriter("Proyecto\\Primera entrega\\entrega1\\AspirantesBk.txt", false);
+            FileWriter fw = new FileWriter("AspirantesBk.txt", false);
             PrintWriter pw = new PrintWriter(fw, false);
             pw.flush();
             pw.close();
