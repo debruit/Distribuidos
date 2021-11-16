@@ -71,9 +71,10 @@ public class filtro {
                 }
 
                 if (done) {
-                    Thread.sleep(10000);
+                    Thread.sleep(2000);
                     System.out.println("Enviando notificacion...");
-                    notificaciones(context);                
+                    notificaciones(context);
+                    respuestas.clear();                
                 }
 
             }
@@ -99,6 +100,8 @@ public class filtro {
                 int idSector = Integer.valueOf(token.nextToken());
                 int idEmpleador = Integer.valueOf(token.nextToken());
                 String oferta = token.nextToken();
+                int idOferta = Integer.valueOf(token.nextToken());
+                String nombre = token.nextToken();
 
                 int filter = 0;
                 // Construir el mensaje de la vacante a enviar al aspirante
@@ -131,10 +134,15 @@ public class filtro {
                 respuestaEmpleador.bind("ipc://empleador");
 
                 // Construir el mensaje de la notificacion a enviar al empleador
-                String responseEmpleador = String.format("%d-%d-El aspirante: -%s", filter, idEmpleador, acepto);
+                String responseEmpleador = String.format("%d-%d-El aspirante -%s -%s: -%d", filter, idEmpleador, nombre,acepto, idOferta);
                 respuestaEmpleador.send(responseEmpleador, 0);
 
                 Thread.sleep(2000);
+
+                vacante.close();
+                respuestaSocket.close();
+                respuestaEmpleador.close();
+
             }
         }
     }

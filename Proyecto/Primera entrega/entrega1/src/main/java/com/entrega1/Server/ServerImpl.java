@@ -116,7 +116,8 @@ public class ServerImpl {
         for (int j = 0; j < ofertasDht.size(); j++) {
             if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
-                    res = String.format("V-%d-%d-%s",ofertasDht.get(j).getIdSector(),ofertasDht.get(j).getIdEmpleador(),ofertasDht.get(j).getDescripcion());
+                    res = String.format("V-%d-%d-%s-%d-%s",ofertasDht.get(j).getIdSector(),ofertasDht.get(j).getIdEmpleador(),ofertasDht.get(j).getDescripcion(), 
+                    ofertasDht.get(j).getId(), solicitud.getNombre());
                     return res;
                 }
             }

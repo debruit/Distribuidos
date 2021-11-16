@@ -11,8 +11,8 @@ Profesional
 Cientifico
 /
 Rizo
-1
+3
 Profesional
-2
-Pesquero
+5
+Ingeniero
 /

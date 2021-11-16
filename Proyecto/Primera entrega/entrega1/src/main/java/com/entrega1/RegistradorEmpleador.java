@@ -78,15 +78,20 @@ public class RegistradorEmpleador {
 
             subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
 
-            String mensaje = subscriber.recvStr(0).trim();
-            StringTokenizer token = new StringTokenizer(mensaje, "-");
+            while (true) {
+                String mensaje = subscriber.recvStr(0).trim();
+                StringTokenizer token = new StringTokenizer(mensaje, "-");
 
-            Integer.valueOf(token.nextToken());
+                Integer.valueOf(token.nextToken());
+                int idEmpleador = Integer.valueOf(token.nextToken());
 
-            for(Oferta oferta : ofertas) {
-                if(oferta.getIdEmpleador() == Integer.valueOf(token.nextToken())){
-                    System.out.println(String.format("%s%s",token.nextToken(),token.nextToken()));
-                    break;
+                for (Oferta oferta : ofertas) {
+
+                    if (oferta.getIdEmpleador() == idEmpleador) {
+                        System.out.println(String.format("%s%s%s%d", token.nextToken(), token.nextToken(),
+                                token.nextToken(), Integer.valueOf(token.nextToken())));
+                                break;
+                    }
                 }
             }
 
