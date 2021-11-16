@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Launch BackupFiltro",
+      "request": "launch",
+      "mainClass": "com.entrega1.BackupFiltro",
+      "projectName": "entrega1"
+    },
+    {
+      "type": "java",
       "name": "Launch RegistradorAspirante",
       "request": "launch",
       "mainClass": "com.entrega1.RegistradorAspirante",

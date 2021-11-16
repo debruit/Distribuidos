@@ -12,9 +12,9 @@ import org.zeromq.ZMQ;
 
 public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
-    static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103", "tcp://*:1101" };
-    // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103",
-    // "tcp://127.0.0.1:1101", "tcp://*:1102" };
+    // static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102",
+    // "tcp://127.0.0.1:1103", "tcp://*:1101" };
+    static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103", "tcp://127.0.0.1:1101", "tcp://*:1102" };
     // static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101",
     // "tcp://127.0.0.1:1102", "tcp://*:1103" };
 
@@ -85,12 +85,43 @@ public class ServerImpl {
                     System.out.println("--------------------------");
                     System.out.println("Aspirante Respuesta: " + response + " ; Enviada al Filtro");
                     System.out.println("--------------------------");
+                } else if (tipoMsj.equals("BorrarOferta")) {
+                    String ofertaStr = msjRecibido.substring(msjRecibido.indexOf("-") + 1);
+                    Oferta ofertaRecibida = new Oferta();
+                    StringTokenizer tokenOferta = new StringTokenizer(ofertaStr, "-");
+                    ofertaRecibida.setId(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setIdSector(Integer.valueOf(tokenOferta.nextToken()));
+                    // ofertaRecibida.setIdSector(tokenOferta.nextToken());
+                    ofertaRecibida.setIdEmpleador(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setDescripcion(tokenOferta.nextToken());
+                    ofertaRecibida.setCargo(tokenOferta.nextToken());
+                    ofertaRecibida.setSueldo(Integer.valueOf(tokenOferta.nextToken()));
+
+                    String response = borrarOferta(ofertaRecibida, ofertaStr);
+                    server.send(response.getBytes(ZMQ.CHARSET), 0);
+                    System.out.println("--------------------------");
+                    System.out.println("Oferta Respuesta: " + response + " ; Enviada al Filtro");
+                    System.out.println("--------------------------");
                 }
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
             System.err.println("Server System exception: " + e);
         }
+    }
+
+    public static String borrarOferta(Oferta oferta, String ofertaStr) {
+        int key = Math.abs(ofertaStr.hashCode());
+        key = key % 256;
+        String response;
+        int lowRange = predecesor > serverId ? 0 : predecesor;
+        if (lowRange < key && key <= serverId) {
+            ht.remove(Integer.toString(key));
+            response = "Llave: " + key + "; Oferta: " + ofertaStr + " Se eliminó del servidor (" + serverId + ")";
+        } else {
+            response = "Oferta " + ofertaStr + " NO esta en el servidor (" + serverId + ")";
+        }
+        return response;
     }
 
     public static String grabarOferta(Oferta oferta, String ofertaStr) {
@@ -130,15 +161,6 @@ public class ServerImpl {
             return false;
         return true;
     }
-
-    // funcion que notifica a los aspirantes que si hay vacantes en ofertas
-    // public static void cumpleCriterios(Solicitud solicitud, Oferta vacante) {}
-
-    // funcion que notifica a los aspirantes que no hay vacantes en ofertas
-    // public static void noCumpleCriterios(Solicitud solicitud, Oferta vacante) {}
-
-    // esta invocaria a cumple criterios o no cumple criterios
-    // public static void notificarAspirante(boolean cumple) {}
 
     public static boolean guardarEnDHT(String key, Oferta value) {
         ht.put(key, value);
