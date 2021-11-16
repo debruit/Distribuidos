@@ -12,11 +12,11 @@ import org.zeromq.ZMQ;
 
 public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
-    // static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102",
-    // "tcp://127.0.0.1:1103", "tcp://*:1101" };
+    static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102",
+    "tcp://127.0.0.1:1103", "tcp://*:1101" };
     // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103",
     // "tcp://127.0.0.1:1101", "tcp://*:1102" };
-    static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://*:1103" };
+    // static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://*:1103" };
 
     static int serverId = Integer.valueOf(info[0]);
     static int sucesor = Integer.valueOf(info[1]);

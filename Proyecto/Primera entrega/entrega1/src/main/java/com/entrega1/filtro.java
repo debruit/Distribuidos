@@ -199,6 +199,14 @@ public class filtro {
                     server1.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server3.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+
+                    byte[] reply1 = server1.recv(0);
+                    byte[] reply2 = server2.recv(0);
+                    byte[] reply3 = server3.recv(0);
+
+                    System.out.println(new String(reply1, ZMQ.CHARSET));
+                    System.out.println(new String(reply2, ZMQ.CHARSET));
+                    System.out.println(new String(reply3, ZMQ.CHARSET));
                 } else {
                     acepto = "Rechazó la oferta";
                 }
@@ -352,7 +360,7 @@ public class filtro {
         ofertas.add(temp2);
         setBackupOfertas(ofertas);
 
-        if (ofertas.size() > 10) {
+        if (ofertas.size() > 0) {
             // ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
             ZMQ.Socket server21 = context.createSocket(SocketType.REQ);
             ZMQ.Socket server22 = context.createSocket(SocketType.REQ);
