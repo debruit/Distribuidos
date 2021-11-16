@@ -12,11 +12,12 @@ import org.zeromq.ZMQ;
 
 public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
-    static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102",
-    "tcp://127.0.0.1:1103", "tcp://*:1101" };
-    // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103",
-    // "tcp://127.0.0.1:1101", "tcp://*:1102" };
-    // static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://*:1103" };
+    // jrizo = 1101, sebas = 1102, camilo, 1103
+    static String[] info = { "85", "170", "255", "tcp://25.12.51.131:1102", "tcp://127.0.0.1:1103", "tcp://*:1101" };
+    // static String[] info = { "170", "255", "85", "tcp://25.78.26.72:1103",
+    // "tcp://25.83.21.137:1101", "tcp://*:1102" };
+    // static String[] info = { "255", "85", "170", "tcp://25.83.21.137:1101",
+    // "tcp://25.12.51.131:1102", "tcp://*:1103" };
 
     static int serverId = Integer.valueOf(info[0]);
     static int sucesor = Integer.valueOf(info[1]);
@@ -153,9 +154,9 @@ public class ServerImpl {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
                     res = String.format("V-%d-%d-%s-%d-%s-%s-%d-%d-%s-%s", ofertasDht.get(j).getIdSector(),
                             ofertasDht.get(j).getIdEmpleador(), ofertasDht.get(j).getDescripcion(),
-                            ofertasDht.get(j).getId(), solicitud.getNombre(), ofertasDht.get(j).getCargo(), 
-                            ofertasDht.get(j).getSueldo(), ofertasDht.get(j).getExperiencia(), ofertasDht.get(j).getHabilidades(), 
-                            ofertasDht.get(j).getEstudios());
+                            ofertasDht.get(j).getId(), solicitud.getNombre(), ofertasDht.get(j).getCargo(),
+                            ofertasDht.get(j).getSueldo(), ofertasDht.get(j).getExperiencia(),
+                            ofertasDht.get(j).getHabilidades(), ofertasDht.get(j).getEstudios());
                     return res;
                 }
             }
