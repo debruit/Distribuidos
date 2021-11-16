@@ -14,9 +14,9 @@ public class ServerImpl {
     static Hashtable<String, Oferta> ht = new Hashtable<String, Oferta>();
     // static String[] info = { "85", "170", "255", "tcp://127.0.0.1:1102",
     // "tcp://127.0.0.1:1103", "tcp://*:1101" };
-    static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103", "tcp://127.0.0.1:1101", "tcp://*:1102" };
-    // static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101",
-    // "tcp://127.0.0.1:1102", "tcp://*:1103" };
+    // static String[] info = { "170", "255", "85", "tcp://127.0.0.1:1103",
+    // "tcp://127.0.0.1:1101", "tcp://*:1102" };
+    static String[] info = { "255", "85", "170", "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://*:1103" };
 
     static int serverId = Integer.valueOf(info[0]);
     static int sucesor = Integer.valueOf(info[1]);
@@ -136,7 +136,9 @@ public class ServerImpl {
             guardarEnDHT(Integer.toString(key), oferta);
             response = "Llave: " + key + "; Oferta: " + ofertaStr + " OK en el servidor (" + serverId + ")";
         } else {
+            // sucesorServer.send(ofertaStr);
             response = "Oferta " + ofertaStr + " NO va en el servidor (" + serverId + ")";
+            // response = "Oferta " + ofertaStr + " Enviada al sucesor ";
         }
         return response;
     }
@@ -147,8 +149,9 @@ public class ServerImpl {
         for (int j = 0; j < ofertasDht.size(); j++) {
             if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
-                    res = String.format("V-%d-%d-%s-%d-%s",ofertasDht.get(j).getIdSector(),ofertasDht.get(j).getIdEmpleador(),ofertasDht.get(j).getDescripcion(), 
-                    ofertasDht.get(j).getId(), solicitud.getNombre());
+                    res = String.format("V-%d-%d-%s-%d-%s", ofertasDht.get(j).getIdSector(),
+                            ofertasDht.get(j).getIdEmpleador(), ofertasDht.get(j).getDescripcion(),
+                            ofertasDht.get(j).getId(), solicitud.getNombre());
                     return res;
                 }
             }

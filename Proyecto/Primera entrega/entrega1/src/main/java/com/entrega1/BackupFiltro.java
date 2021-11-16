@@ -30,6 +30,7 @@ public class BackupFiltro {
   // "tcp://25.12.51.131:1102", "tcp://127.0.0.1:1103" };
   static String aspiranteIp = "";
   static String empleadorIp = "";
+  static ArrayList<String> respuestas = new ArrayList<String>();
 
   public static void main(String args[]) {
     ArrayList<Aspirante> solicitudes = new ArrayList<>();
@@ -55,6 +56,7 @@ public class BackupFiltro {
           solicitudes.clear();
           ofertas.clear();
           String msjRecibido = new String(reply, ZMQ.CHARSET);
+          System.out.println("Desde filtro: ");
           String arrayOfertas = msjRecibido.substring(0, msjRecibido.indexOf("|"));
           String arraySolicitudes = msjRecibido.substring(msjRecibido.indexOf("|") + 1);
 
@@ -71,6 +73,10 @@ public class BackupFiltro {
             ofertaRecibida.setDescripcion(tokenOferta.nextToken());
             ofertaRecibida.setCargo(tokenOferta.nextToken());
             ofertaRecibida.setSueldo(Integer.valueOf(tokenOferta.nextToken()));
+            ofertaRecibida.setExperiencia(Integer.valueOf(tokenOferta.nextToken()));
+            ofertaRecibida.setHabilidades(tokenOferta.nextToken());
+            ofertaRecibida.setEstudios(tokenOferta.nextToken());
+
             ofertas.add(ofertaRecibida);
           }
           StringTokenizer tokenArrSolicitudes = new StringTokenizer(arraySolicitudes, "_");
@@ -141,43 +147,61 @@ public class BackupFiltro {
   }
 
   public static void retomarFiltro(ArrayList<Aspirante> solicitudes, ArrayList<Oferta> ofertas) {
+    // ArrayList<Aspirante> solicitudes = new ArrayList<Aspirante>();
     String solicitudServer = "", sector = "";
 
+    // ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
+    // ArrayList<Oferta> ofertas = getBackupOfertas();
     String ofertaServer = "";
-
-    boolean doneOferta = false, doneSolicitud = false;
 
     try (ZContext context = new ZContext()) {
       System.out.println("Corriendo filtro...");
       ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-      // ZMQ.Socket subscriber2 = context.createSocket(SocketType.SUB);
-      // subscriber.connect("tcp://25.12.51.131:1099");
       subscriber.connect("tcp://127.0.0.1:1099");
-      // subscriber2.connect("tcp://127.0.0.1:1234");
 
       String solicitud = "0";
 
       subscriber.subscribe(solicitud.getBytes(ZMQ.CHARSET));
       // subscriber2.subscribe(solicitud.getBytes(ZMQ.CHARSET));
 
+      subscriber.setReceiveTimeOut(1000);
+      ZMQ.Socket backfiltro = context.createSocket(SocketType.REP);
+      backfiltro.bind("tcp://127.0.0.1:2777");
+      backfiltro.setReceiveTimeOut(200);
+      // backfiltro.setSendTimeOut(1000);
       while (true) {
-
-        String mensaje = subscriber.recvStr(0).trim();
-
-        StringTokenizer token = new StringTokenizer(mensaje, "-");
-
-        Integer.valueOf(token.nextToken());
-
-        if (token.nextToken().equals("Aspirante")) {
-          doneSolicitud = agregarSolicitud(token, solicitudes, context, sector, solicitudServer);
-        } else {
-          doneOferta = agregarOferta(token, ofertas, context, sector, ofertaServer);
+        String msjRecibido = backfiltro.recvStr(0);
+        if (msjRecibido != null) {
+          msjRecibido.trim();
+          System.out.println("BackupFiltro: " + msjRecibido);
+          backfiltro.send(getInfoBackup(solicitudes, ofertas).getBytes(ZMQ.CHARSET), 0);
         }
 
-        // if (doneSolicitud && doneOferta) {
-        // notificaciones(context);
-        // }
+        String mensaje = subscriber.recvStr(0);
+        if (mensaje != null) {
+          mensaje.trim();
+          boolean done = true;
 
+          StringTokenizer token = new StringTokenizer(mensaje, "-");
+
+          Integer.valueOf(token.nextToken());
+
+          if (token.nextToken().equals("Aspirante")) {
+            // done = false;
+            agregarSolicitud(token, solicitudes, context, sector, solicitudServer);
+          } else {
+            done = false;
+            agregarOferta(token, ofertas, context, sector, ofertaServer);
+          }
+
+          if (done) {
+            Thread.sleep(2000);
+            System.out.println("Enviando notificacion...");
+            notificaciones(context);
+            respuestas.clear();
+          }
+
+        }
       }
 
     } catch (Exception e) {
@@ -185,56 +209,71 @@ public class BackupFiltro {
     }
   }
 
-  public static void notificaciones(ZContext context) {
+  public static void notificaciones(ZContext context) throws InterruptedException {
+
     // Request a todos los servidores por vacantes
-    // Respuesta de todos los servidores
-    byte[] reply1 = null;// server21.recv(0);
-    String hayVacante = new String(reply1, ZMQ.CHARSET);
-    if (hayVacante.contains("1")) {
-      ZMQ.Socket vacante = context.createSocket(SocketType.PUB);
-      vacante.bind("tcp://*:2099");
-      vacante.bind("ipc://vacante");
+    for (String reply : respuestas) {
+      if (reply.contains("V")) {
+        ZMQ.Socket vacante = context.createSocket(SocketType.PUB);
+        vacante.bind("tcp://*:2099");
+        vacante.bind("ipc://vacante");
 
-      // Tokenizar la respuesta del servidor
+        // Tokenizar la respuesta del servidor
+        StringTokenizer token = new StringTokenizer(reply, "-");
+        token.nextToken();
+        int idSector = Integer.valueOf(token.nextToken());
+        int idEmpleador = Integer.valueOf(token.nextToken());
+        String oferta = token.nextToken();
+        int idOferta = Integer.valueOf(token.nextToken());
+        String nombre = token.nextToken();
 
-      // Id del sector y oferta de la vacante(Sale de la tokenizacion)
-      int idSector = 0, idOferta = 0;
-      // Construir el mensaje de la vacante a enviar al aspirante
-      String vacanteSector = String.format("%d-%s", idSector);
-      vacante.send(vacanteSector, 0);
+        int filter = 0;
+        // Construir el mensaje de la vacante a enviar al aspirante
+        String vacanteSector = String.format("%d-%d-%s", filter, idSector, oferta);
+        vacante.send(vacanteSector, 0);
 
-      // Respuesta del aspirante
-      ZMQ.Socket respuestaSocket = context.createSocket(SocketType.SUB);
-      respuestaSocket.connect("tcp://127.0.0.1:3099");
+        Thread.sleep(2000);
 
-      //
-      String acepta = "0";
+        // Respuesta del aspirante
+        ZMQ.Socket respuestaSocket = context.createSocket(SocketType.SUB);
+        respuestaSocket.connect("tcp://127.0.0.1:3099");
 
-      respuestaSocket.subscribe(acepta.getBytes(ZMQ.CHARSET));
+        //
+        String acepta = "0";
 
-      String response = respuestaSocket.recvStr(0).trim();
+        respuestaSocket.subscribe(acepta.getBytes(ZMQ.CHARSET));
 
-      String acepto = "";
+        String response = respuestaSocket.recvStr(0).trim();
 
-      ZMQ.Socket respuestaEmpleador = context.createSocket(SocketType.PUB);
-      respuestaEmpleador.bind("tcp://*:4099");
-      respuestaEmpleador.bind("ipc://empleador");
+        String acepto = "";
 
-      if (response.contains("y")) {
-        acepto = "Aceptó la oferta";
-      } else {
-        acepto = "Rechazó la oferta";
+        if (response.contains("y")) {
+          acepto = "Aceptó la oferta";
+        } else {
+          acepto = "Rechazó la oferta";
+        }
+
+        ZMQ.Socket respuestaEmpleador = context.createSocket(SocketType.PUB);
+        respuestaEmpleador.bind("tcp://*:4099");
+        respuestaEmpleador.bind("ipc://empleador");
+
+        // Construir el mensaje de la notificacion a enviar al empleador
+        String responseEmpleador = String.format("%d-%d-El aspirante -%s -%s: -%d", filter, idEmpleador, nombre, acepto,
+            idOferta);
+        respuestaEmpleador.send(responseEmpleador, 0);
+
+        Thread.sleep(2000);
+
+        vacante.close();
+        respuestaSocket.close();
+        respuestaEmpleador.close();
+
       }
-
-      int idEmpleador = 0;
-      // Construir el mensaje de la notificacion a enviar al empleador
-      String responseEmpleador = String.format("%d-El aspirante: -%s-%d", idEmpleador, acepto, idOferta);
-      respuestaEmpleador.send(responseEmpleador, 0);
     }
   }
 
   public static boolean agregarSolicitud(StringTokenizer token, ArrayList<Aspirante> solicitudes, ZContext context,
-      String sector, String solicitudServer) {
+      String sector, String solicitudServer) throws InterruptedException {
     Aspirante temp = new Aspirante();
 
     temp.setIdAspirante(Integer.valueOf(token.nextToken()));
@@ -244,6 +283,7 @@ public class BackupFiltro {
     temp.setExperiencia(Integer.valueOf(token.nextToken()));
     temp.setIdSector(Integer.valueOf(token.nextToken()));
     solicitudes.add(temp);
+    setBackupAspirantes(solicitudes);
 
     if (solicitudes.size() > 0) {
 
@@ -256,13 +296,7 @@ public class BackupFiltro {
       server1.connect(serversIps[0]);
       server2.connect(serversIps[1]);
       server3.connect(serversIps[2]);
-
-      server1.setSendTimeOut(2000);
-      server1.setReceiveTimeOut(2000);
-      server2.setSendTimeOut(2000);
-      server2.setReceiveTimeOut(2000);
-      server3.setSendTimeOut(2000);
-      server3.setReceiveTimeOut(2000);
+      byte[] reply1 = null, reply2 = null, reply3 = null;
       for (int i = 0; i < solicitudes.size(); i++) {
 
         sector = solicitudes.get(i).getHabilidades();
@@ -327,27 +361,21 @@ public class BackupFiltro {
           server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
         }
         // byte[] reply = server.recv(0);
-        byte[] reply1 = server1.recv(0);
-        byte[] reply2 = server2.recv(0);
-        byte[] reply3 = server3.recv(0);
-        if (null == reply1) {
-          System.out.println("NO llego respuesta de server 1");
-        } else {
-          System.out.println(new String(reply1, ZMQ.CHARSET));
-        }
-        if (null == reply2) {
-          System.out.println("NO llego respuesta de server 2");
-        } else {
-          System.out.println(new String(reply2, ZMQ.CHARSET));
-        }
-        if (null == reply3) {
-          System.out.println("NO llego respuesta de server 3");
-        } else {
-          System.out.println(new String(reply3, ZMQ.CHARSET));
-        }
+        reply1 = server1.recv(0);
+        reply2 = server2.recv(0);
+        reply3 = server3.recv(0);
+
+        // System.out.println(new String(reply, ZMQ.CHARSET));
+
+        respuestas.add(new String(reply1, ZMQ.CHARSET));
+        respuestas.add(new String(reply2, ZMQ.CHARSET));
+        respuestas.add(new String(reply3, ZMQ.CHARSET));
         System.out.println();
       }
+      // Thread.sleep(6000);
+      // notificaciones(context,reply1,reply2,reply3);
       solicitudes.clear();
+      clearBackupAspirantes();
     }
     return true;
   }
@@ -365,6 +393,7 @@ public class BackupFiltro {
     temp2.setHabilidades(token.nextToken());
     temp2.setEstudios(token.nextToken());
     ofertas.add(temp2);
+    setBackupOfertas(ofertas);
 
     if (ofertas.size() > 0) {
       // ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
@@ -376,13 +405,6 @@ public class BackupFiltro {
       server21.connect(serversIps[0]);
       server22.connect(serversIps[1]);
       server23.connect(serversIps[2]);
-
-      server21.setSendTimeOut(2000);
-      server21.setReceiveTimeOut(2000);
-      server22.setSendTimeOut(2000);
-      server22.setReceiveTimeOut(2000);
-      server23.setSendTimeOut(2000);
-      server23.setReceiveTimeOut(2000);
       for (int i = 0; i < ofertas.size(); i++) {
 
         sector = ofertas.get(i).getCargo();
@@ -466,28 +488,106 @@ public class BackupFiltro {
         byte[] reply2 = server22.recv(0);
         byte[] reply3 = server23.recv(0);
 
-        if (null == reply1) {
-          System.out.println("NO llego respuesta de server 1");
-        } else {
-          System.out.println(new String(reply1, ZMQ.CHARSET));
-        }
-        if (null == reply2) {
-          System.out.println("NO llego respuesta de server 2");
-        } else {
-          System.out.println(new String(reply2, ZMQ.CHARSET));
-        }
-        if (null == reply3) {
-          System.out.println("NO llego respuesta de server 3");
-        } else {
-          System.out.println(new String(reply3, ZMQ.CHARSET));
-        }
+        // System.out.println(new String(reply, ZMQ.CHARSET));
+        System.out.println(new String(reply1, ZMQ.CHARSET));
+        System.out.println(new String(reply2, ZMQ.CHARSET));
+        System.out.println(new String(reply3, ZMQ.CHARSET));
         System.out.println();
 
       }
+      clearBackupOfertas();
       ofertas.clear();
     }
     return true;
 
+  }
+
+  public static void setBackupOfertas(ArrayList<Oferta> ofertas) {
+    try {
+      FileOutputStream fos = new FileOutputStream("OfertasBk.txt");
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
+      objectOutputStream.writeInt(ofertas.size());
+      for (Oferta oferta : ofertas) {
+        objectOutputStream.writeObject(oferta);
+      }
+      objectOutputStream.close();
+    } catch (Exception e) {
+      System.out.println("Exception guardarEnBackup: " + e.getMessage());
+    }
+  }
+
+  public static void setBackupAspirantes(ArrayList<Aspirante> solicitudes) {
+    try {
+      FileOutputStream fos = new FileOutputStream("AspirantesBk.txt");
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
+      objectOutputStream.writeInt(solicitudes.size());
+      for (Aspirante oferta : solicitudes) {
+        objectOutputStream.writeObject(oferta);
+      }
+      objectOutputStream.close();
+    } catch (Exception e) {
+      System.out.println("Exception guardarEnBackup: " + e.getMessage());
+    }
+  }
+
+  public static ArrayList<Oferta> getBackupOfertas() {
+    ArrayList<Oferta> res = new ArrayList<>();
+    try {
+      FileInputStream fileInputStream = new FileInputStream("OfertasBk.txt");
+      ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+      int trainCount = objectInputStream.readInt();
+      for (int i = 0; i < trainCount; i++) {
+        res.add((Oferta) objectInputStream.readObject());
+      }
+      System.out.println("Se recuperó de backup: ");
+      System.out.println(res);
+      fileInputStream.close();
+      objectInputStream.close();
+    } catch (Exception e) {
+      System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+    }
+    return res;
+  }
+
+  public static ArrayList<Aspirante> getBackupAspirantes() {
+    ArrayList<Aspirante> res = new ArrayList<>();
+    try {
+      FileInputStream fileInputStream = new FileInputStream("AspirantesBk.txt");
+      ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+      int trainCount = objectInputStream.readInt();
+      for (int i = 0; i < trainCount; i++) {
+        res.add((Aspirante) objectInputStream.readObject());
+      }
+      System.out.println("Se recuperó de backup: ");
+      System.out.println(res);
+      fileInputStream.close();
+      objectInputStream.close();
+    } catch (Exception e) {
+      System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+    }
+    return res;
+  }
+
+  public static void clearBackupOfertas() {
+    try {
+      FileWriter fw = new FileWriter("OfertasBk.txt", false);
+      PrintWriter pw = new PrintWriter(fw, false);
+      pw.flush();
+      pw.close();
+    } catch (Exception e) {
+      System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+    }
+  }
+
+  public static void clearBackupAspirantes() {
+    try {
+      FileWriter fw = new FileWriter("AspirantesBk.txt", false);
+      PrintWriter pw = new PrintWriter(fw, false);
+      pw.flush();
+      pw.close();
+    } catch (Exception e) {
+      System.out.println("Exception obtenerDeBackup: " + e.getMessage());
+    }
   }
 
 }

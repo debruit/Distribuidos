@@ -28,7 +28,7 @@ public class RegistradorEmpleador {
 
             try {
                 // File file = new File("empleador.txt");
-                File file = new File("empleador.txt");
+                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;
@@ -90,7 +90,7 @@ public class RegistradorEmpleador {
                     if (oferta.getIdEmpleador() == idEmpleador) {
                         System.out.println(String.format("%s%s%s%d", token.nextToken(), token.nextToken(),
                                 token.nextToken(), Integer.valueOf(token.nextToken())));
-                                break;
+                        break;
                     }
                 }
             }

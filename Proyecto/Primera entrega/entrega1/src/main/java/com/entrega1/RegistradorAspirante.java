@@ -27,7 +27,7 @@ public class RegistradorAspirante {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("solicitudes.txt");
+                File file = new File("Proyecto\\Primera entrega\\entrega1\\solicitudes.txt");
                 // File file = new File("solicitudes.txt");
                 Scanner myReader = new Scanner(file);
                 Aspirante solicitud = new Aspirante();
