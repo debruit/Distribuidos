@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -27,7 +28,7 @@ public class RegistradorEmpleador {
 
             try {
                 // File file = new File("empleador.txt");
-                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
+                File file = new File("empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;
@@ -77,9 +78,23 @@ public class RegistradorEmpleador {
 
             subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
 
-            String mensaje = subscriber.recvStr(0).trim();
+            while (true) {
+                String mensaje = subscriber.recvStr(0).trim();
+                StringTokenizer token = new StringTokenizer(mensaje, "-");
 
-            System.out.println("Mensaje recibido: " + mensaje);
+                Integer.valueOf(token.nextToken());
+                int idEmpleador = Integer.valueOf(token.nextToken());
+
+                for (Oferta oferta : ofertas) {
+
+                    if (oferta.getIdEmpleador() == idEmpleador) {
+                        System.out.println(String.format("%s%s%s%d", token.nextToken(), token.nextToken(),
+                                token.nextToken(), Integer.valueOf(token.nextToken())));
+                                break;
+                    }
+                }
+            }
+
         } catch (Exception e) {
             System.err.println(" System exception: " + e);
         }

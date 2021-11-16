@@ -1,17 +1,17 @@
 1
-Director of Photography
-Gerente de proyectos
+Aqui va la descripcion del cargo
+Aqui va el cargo
 1234
 2
-Liderarte de proyectos
-Profesional de ingeniería
+Aqui van los estudios requeridos
+Aqui van las habilidades requeridas
 /
 1
-Inge of Photography
+Inge of AI
 Fisico cuantico
 1234
 3
-Investigacion
+Cientifico
 Profesional
 /
 1
@@ -19,6 +19,6 @@ Director of Photography
 Ingeniero de sistemas
 1234
 4
-All god
-Profesional de ingeniería
+Ingeniero
+Profesional
 /

@@ -1,18 +1,18 @@
-Juan
+Aqui va el nombre
 1
-Profesional en ingeniería de software
+Aqui van los estudios
 2
-Ingeniero en sistemas
+Aqui van las habilidades
 /
-Juan
-5
+Camilin
+2
 Profesional
 6
 Cientifico
 /
 Rizo
-1
+3
 Profesional
-2
-Pesquero
+5
+Ingeniero
 /

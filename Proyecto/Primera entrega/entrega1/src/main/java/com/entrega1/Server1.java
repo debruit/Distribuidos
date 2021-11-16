@@ -25,8 +25,6 @@ public class Server1 {
 
     public static void main(String args[]) throws Exception {
 
-        String key;
-        Oferta value;
 
             try(ZContext context = new ZContext()){
 

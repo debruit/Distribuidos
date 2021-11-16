@@ -106,6 +106,10 @@ public class Aspirante implements Serializable {
         return habilidades;
     }
 
+    public void addOfertaAceptada(boolean oferta) {
+        this.ofertasAceptadas.add(oferta);
+    }
+
     
 
    

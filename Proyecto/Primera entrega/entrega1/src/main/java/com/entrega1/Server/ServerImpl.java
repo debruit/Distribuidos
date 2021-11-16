@@ -63,6 +63,9 @@ public class ServerImpl {
                     ofertaRecibida.setDescripcion(tokenOferta.nextToken());
                     ofertaRecibida.setCargo(tokenOferta.nextToken());
                     ofertaRecibida.setSueldo(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setExperiencia(Integer.valueOf(tokenOferta.nextToken()));
+                    ofertaRecibida.setHabilidades(tokenOferta.nextToken());
+                    ofertaRecibida.setEstudios(tokenOferta.nextToken());
 
                     String response = grabarOferta(ofertaRecibida, ofertaStr);
                     server.send(response.getBytes(ZMQ.CHARSET), 0);
@@ -140,11 +143,13 @@ public class ServerImpl {
 
     public static String verificarVacantes(Aspirante solicitud) {
         ArrayList<Oferta> ofertasDht = new ArrayList<>(ht.values());
-        String res = "No se encontraron match";
+        String res = "No se encontraron matches";
         for (int j = 0; j < ofertasDht.size(); j++) {
             if (ofertasDht.get(j).getIdSector() == solicitud.getIdSector()) {
                 if (validarCriterios(solicitud, ofertasDht.get(j))) {
-                    res = ofertasDht.get(j) + "_" + solicitud;
+                    res = String.format("V-%d-%d-%s-%d-%s",ofertasDht.get(j).getIdSector(),ofertasDht.get(j).getIdEmpleador(),ofertasDht.get(j).getDescripcion(), 
+                    ofertasDht.get(j).getId(), solicitud.getNombre());
+                    return res;
                 }
             }
         }
@@ -155,9 +160,9 @@ public class ServerImpl {
     public static boolean validarCriterios(Aspirante solicitud, Oferta vacante) {
         if (vacante.getExperiencia() > solicitud.getExperiencia())
             return false;
-        if (vacante.getEstudios() != solicitud.getEstudios())
+        if (!vacante.getEstudios().equals(solicitud.getEstudios()))
             return false;
-        if (vacante.getHabilidades() != solicitud.getHabilidades())
+        if (!vacante.getHabilidades().equals(solicitud.getHabilidades()))
             return false;
         return true;
     }

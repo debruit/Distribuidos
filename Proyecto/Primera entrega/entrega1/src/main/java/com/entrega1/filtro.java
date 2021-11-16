@@ -6,9 +6,7 @@ import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.nio.channels.ClosedSelectorException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.zeromq.SocketType;
@@ -32,6 +30,7 @@ public class filtro {
     // "tcp://25.12.51.131:1102", "tcp://127.0.0.1:1103" };
     static String aspiranteIp = "";
     static String empleadorIp = "";
+    static ArrayList<String> respuestas = new ArrayList<String>();
 
     public static void main(String args[]) {
 
@@ -42,15 +41,10 @@ public class filtro {
         ArrayList<Oferta> ofertas = getBackupOfertas();
         String ofertaServer = "";
 
-        boolean doneOferta = false, doneSolicitud = false;
-
         try (ZContext context = new ZContext()) {
             System.out.println("Corriendo filtro...");
             ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-            // ZMQ.Socket subscriber2 = context.createSocket(SocketType.SUB);
-            // subscriber.connect("tcp://25.12.51.131:1099");
             subscriber.connect("tcp://127.0.0.1:1099");
-            // subscriber2.connect("tcp://127.0.0.1:1234");
 
             String solicitud = "0";
 
@@ -59,21 +53,29 @@ public class filtro {
 
             while (true) {
 
+
                 String mensaje = subscriber.recvStr(0).trim();
+
+                boolean done = true;
 
                 StringTokenizer token = new StringTokenizer(mensaje, "-");
 
                 Integer.valueOf(token.nextToken());
 
                 if (token.nextToken().equals("Aspirante")) {
-                    doneSolicitud = agregarSolicitud(token, solicitudes, context, sector, solicitudServer);
+                    // done = false;
+                    agregarSolicitud(token, solicitudes, context, sector, solicitudServer);
                 } else {
-                    doneOferta = agregarOferta(token, ofertas, context, sector, ofertaServer);
+                    done = false;
+                    agregarOferta(token, ofertas, context, sector, ofertaServer);
                 }
 
-                // if (doneSolicitud && doneOferta) {
-                //     notificaciones(context);
-                // }
+                if (done) {
+                    Thread.sleep(2000);
+                    System.out.println("Enviando notificacion...");
+                    notificaciones(context);
+                    respuestas.clear();                
+                }
 
             }
 
@@ -82,56 +84,71 @@ public class filtro {
         }
     }
 
-    public static void notificaciones(ZContext context) {
+    public static void notificaciones(ZContext context)
+            throws InterruptedException {
+
         // Request a todos los servidores por vacantes
-        // Respuesta de todos los servidores
-        byte[] reply1 = null;// server21.recv(0);
-        String hayVacante = new String(reply1, ZMQ.CHARSET);
-        if (hayVacante.contains("1")) {
-            ZMQ.Socket vacante = context.createSocket(SocketType.PUB);
-            vacante.bind("tcp://*:2099");
-            vacante.bind("ipc://vacante");
+        for (String reply : respuestas) {
+            if (reply.contains("V")) {
+                ZMQ.Socket vacante = context.createSocket(SocketType.PUB);
+                vacante.bind("tcp://*:2099");
+                vacante.bind("ipc://vacante");
 
-            // Tokenizar la respuesta del servidor
+                // Tokenizar la respuesta del servidor
+                StringTokenizer token = new StringTokenizer(reply, "-");
+                token.nextToken();
+                int idSector = Integer.valueOf(token.nextToken());
+                int idEmpleador = Integer.valueOf(token.nextToken());
+                String oferta = token.nextToken();
+                int idOferta = Integer.valueOf(token.nextToken());
+                String nombre = token.nextToken();
 
-            // Id del sector y oferta de la vacante(Sale de la tokenizacion)
-            int idSector = 0, idOferta = 0;
-            // Construir el mensaje de la vacante a enviar al aspirante
-            String vacanteSector = String.format("%d-%s", idSector);
-            vacante.send(vacanteSector, 0);
+                int filter = 0;
+                // Construir el mensaje de la vacante a enviar al aspirante
+                String vacanteSector = String.format("%d-%d-%s", filter, idSector, oferta);
+                vacante.send(vacanteSector, 0);
 
-            // Respuesta del aspirante
-            ZMQ.Socket respuestaSocket = context.createSocket(SocketType.SUB);
-            respuestaSocket.connect("tcp://127.0.0.1:3099");
+                Thread.sleep(2000);
 
-            //
-            String acepta = "0";
+                // Respuesta del aspirante
+                ZMQ.Socket respuestaSocket = context.createSocket(SocketType.SUB);
+                respuestaSocket.connect("tcp://127.0.0.1:3099");
 
-            respuestaSocket.subscribe(acepta.getBytes(ZMQ.CHARSET));
+                //
+                String acepta = "0";
 
-            String response = respuestaSocket.recvStr(0).trim();
+                respuestaSocket.subscribe(acepta.getBytes(ZMQ.CHARSET));
 
-            String acepto = "";
+                String response = respuestaSocket.recvStr(0).trim();
 
-            ZMQ.Socket respuestaEmpleador = context.createSocket(SocketType.PUB);
-            respuestaEmpleador.bind("tcp://*:4099");
-            respuestaEmpleador.bind("ipc://empleador");
+                String acepto = "";
 
-            if (response.contains("y")) {
-                acepto = "Aceptó la oferta";
-            } else {
-                acepto = "Rechazó la oferta";
+                if (response.contains("y")) {
+                    acepto = "Aceptó la oferta";
+                } else {
+                    acepto = "Rechazó la oferta";
+                }
+
+                ZMQ.Socket respuestaEmpleador = context.createSocket(SocketType.PUB);
+                respuestaEmpleador.bind("tcp://*:4099");
+                respuestaEmpleador.bind("ipc://empleador");
+
+                // Construir el mensaje de la notificacion a enviar al empleador
+                String responseEmpleador = String.format("%d-%d-El aspirante -%s -%s: -%d", filter, idEmpleador, nombre,acepto, idOferta);
+                respuestaEmpleador.send(responseEmpleador, 0);
+
+                Thread.sleep(2000);
+
+                vacante.close();
+                respuestaSocket.close();
+                respuestaEmpleador.close();
+
             }
-
-            int idEmpleador = 0;
-            // Construir el mensaje de la notificacion a enviar al empleador
-            String responseEmpleador = String.format("%d-El aspirante: -%s-%d", idEmpleador, acepto, idOferta);
-            respuestaEmpleador.send(responseEmpleador, 0);
         }
     }
 
     public static boolean agregarSolicitud(StringTokenizer token, ArrayList<Aspirante> solicitudes, ZContext context,
-            String sector, String solicitudServer) {
+            String sector, String solicitudServer) throws InterruptedException {
         Aspirante temp = new Aspirante();
 
         temp.setIdAspirante(Integer.valueOf(token.nextToken()));
@@ -154,6 +171,7 @@ public class filtro {
             server1.connect(serversIps[0]);
             server2.connect(serversIps[1]);
             server3.connect(serversIps[2]);
+            byte[] reply1 = null, reply2 = null, reply3 = null;
             for (int i = 0; i < solicitudes.size(); i++) {
 
                 sector = solicitudes.get(i).getHabilidades();
@@ -223,16 +241,19 @@ public class filtro {
                     server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
                 }
                 // byte[] reply = server.recv(0);
-                byte[] reply1 = server1.recv(0);
-                byte[] reply2 = server2.recv(0);
-                byte[] reply3 = server3.recv(0);
+                reply1 = server1.recv(0);
+                reply2 = server2.recv(0);
+                reply3 = server3.recv(0);
 
                 // System.out.println(new String(reply, ZMQ.CHARSET));
-                System.out.println(new String(reply1, ZMQ.CHARSET));
-                System.out.println(new String(reply2, ZMQ.CHARSET));
-                System.out.println(new String(reply3, ZMQ.CHARSET));
+
+                respuestas.add(new String(reply1, ZMQ.CHARSET));
+                respuestas.add(new String(reply2, ZMQ.CHARSET));
+                respuestas.add(new String(reply3, ZMQ.CHARSET));
                 System.out.println();
             }
+            // Thread.sleep(6000);
+            // notificaciones(context,reply1,reply2,reply3);
             solicitudes.clear();
             clearBackupAspirantes();
         }
@@ -276,8 +297,9 @@ public class filtro {
 
                     ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
-                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(),
+                            ofertas.get(i).getExperiencia(), ofertas.get(i).getHabilidades(),
+                            ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -290,8 +312,9 @@ public class filtro {
 
                     ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
-                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(),
+                            ofertas.get(i).getExperiencia(), ofertas.get(i).getHabilidades(),
+                            ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -305,8 +328,9 @@ public class filtro {
 
                     ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
-                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(),
+                            ofertas.get(i).getExperiencia(), ofertas.get(i).getHabilidades(),
+                            ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -320,8 +344,9 @@ public class filtro {
 
                     ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
-                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(),
+                            ofertas.get(i).getExperiencia(), ofertas.get(i).getHabilidades(),
+                            ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -334,8 +359,9 @@ public class filtro {
 
                     ofertaServer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
                             ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(),
-                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
-                            ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
+                            ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(),
+                            ofertas.get(i).getExperiencia(), ofertas.get(i).getHabilidades(),
+                            ofertas.get(i).getEstudios());
 
                     // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                     server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -369,6 +395,7 @@ public class filtro {
             for (Oferta oferta : ofertas) {
                 objectOutputStream.writeObject(oferta);
             }
+            objectOutputStream.close();
         } catch (Exception e) {
             System.out.println("Exception guardarEnBackup: " + e.getMessage());
         }
@@ -382,6 +409,7 @@ public class filtro {
             for (Aspirante oferta : solicitudes) {
                 objectOutputStream.writeObject(oferta);
             }
+            objectOutputStream.close();
         } catch (Exception e) {
             System.out.println("Exception guardarEnBackup: " + e.getMessage());
         }
@@ -409,8 +437,7 @@ public class filtro {
     public static ArrayList<Aspirante> getBackupAspirantes() {
         ArrayList<Aspirante> res = new ArrayList<>();
         try {
-            FileInputStream fileInputStream = new FileInputStream(
-                    "AspirantesBk.txt");
+            FileInputStream fileInputStream = new FileInputStream("AspirantesBk.txt");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             int trainCount = objectInputStream.readInt();
             for (int i = 0; i < trainCount; i++) {
