@@ -1,10 +1,10 @@
-Juan
+Aqui va el nombre
 1
-Profesional en ingeniería de software
+Aqui van los estudios
 2
-Ingeniero en sistemas
+Aqui van las habilidades
 /
-Juan
+Camilin
 2
 Profesional
 6
