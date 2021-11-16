@@ -28,7 +28,7 @@ public class RegistradorEmpleador {
 
             try {
                 // File file = new File("empleador.txt");
-                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
+                File file = new File("empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;

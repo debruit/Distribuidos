@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -140,6 +139,21 @@ public class filtro {
                 String oferta = token.nextToken();
                 int idOferta = Integer.valueOf(token.nextToken());
                 String nombre = token.nextToken();
+                String cargo = token.nextToken();
+                int sueldo = Integer.valueOf(token.nextToken());
+                int experiencia = Integer.valueOf(token.nextToken());
+                String habilidades = token.nextToken();
+                String estudios = token.nextToken();
+                Oferta ofertas= new Oferta();
+                ofertas.setId(idOferta);
+                ofertas.setDescripcion(oferta);
+                ofertas.setIdEmpleador(idEmpleador);
+                ofertas.setIdSector(idSector);
+                ofertas.setCargo(cargo);
+                ofertas.setSueldo(sueldo);
+                ofertas.setExperiencia(experiencia);
+                ofertas.setHabilidades(habilidades);
+                ofertas.setEstudios(estudios);
 
                 int filter = 0;
                 // Construir el mensaje de la vacante a enviar al aspirante
@@ -163,6 +177,25 @@ public class filtro {
 
                 if (response.contains("y")) {
                     acepto = "Aceptó la oferta";
+
+                    ZMQ.Socket server1 = context.createSocket(SocketType.REQ);
+                    ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
+                    ZMQ.Socket server3 = context.createSocket(SocketType.REQ);
+                    // server.connect("tcp://25.12.51.131:1098");
+                    // server.connect("tcp://127.0.0.1:1098");
+                    server1.connect(serversIps[0]);
+                    server2.connect(serversIps[1]);
+                    server3.connect(serversIps[2]);
+
+                    String ofertaServer = String.format("BorrarOferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.getId(),
+                            ofertas.getIdSector(), ofertas.getIdEmpleador(),
+                            ofertas.getDescripcion(), ofertas.getCargo(), ofertas.getSueldo(),
+                            ofertas.getExperiencia(), ofertas.getHabilidades(),
+                            ofertas.getEstudios());
+
+                    server1.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+                    server3.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
                 } else {
                     acepto = "Rechazó la oferta";
                 }
@@ -199,7 +232,7 @@ public class filtro {
         solicitudes.add(temp);
         setBackupAspirantes(solicitudes);
 
-        if (solicitudes.size() > 9) {
+        if (solicitudes.size() > 0) {
 
             // ZMQ.Socket server = context.createSocket(SocketType.REQ);
             ZMQ.Socket server1 = context.createSocket(SocketType.REQ);
