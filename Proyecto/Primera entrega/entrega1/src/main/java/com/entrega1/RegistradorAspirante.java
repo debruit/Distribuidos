@@ -98,6 +98,12 @@ public class RegistradorAspirante {
 
                         String acepta = System.console().readLine();
 
+                        if (acepta.equals("y")) {
+                            aspirante.addOfertaAceptada(true);
+                        } else {
+                            aspirante.addOfertaAceptada(false);
+                        }
+
                         int id = 0;
                         Thread.sleep(2000);
 
