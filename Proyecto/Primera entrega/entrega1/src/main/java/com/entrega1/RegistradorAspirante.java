@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
@@ -26,7 +27,7 @@ public class RegistradorAspirante {
             empleador.bind("ipc://registrador");
 
             try {
-                File file = new File("Proyecto\\Primera entrega\\entrega1\\solicitudes.txt");
+                File file = new File("solicitudes.txt");
                 // File file = new File("solicitudes.txt");
                 Scanner myReader = new Scanner(file);
                 Aspirante solicitud = new Aspirante();
@@ -71,30 +72,41 @@ public class RegistradorAspirante {
             subscriber.connect("tcp://127.0.0.1:2099");
             System.out.println("Esperando respuesta vacante...");
 
-            // for de todos los aspirantes
-
-            // Id del sector
             String respuesta = "0";
 
             subscriber.subscribe(respuesta.getBytes(ZMQ.CHARSET));
 
             String mensaje = subscriber.recvStr(0).trim();
 
-            // Evalua la vacante y responde
-            ZMQ.Socket respuestaSocket = context.createSocket(SocketType.PUB);
-            respuestaSocket.bind("tcp://*:3099");
-            respuestaSocket.bind("ipc://respuesta");
+            StringTokenizer token = new StringTokenizer(mensaje, "-");
 
-            System.out.println("Acepta la vacante? (y/n)");
+            Integer.valueOf(token.nextToken());
 
-            boolean acepta = System.console().readLine().equals("y");
+            // for de todos los aspirantes
 
-            int id = 0;
+            for (Aspirante aspirante : aspirantes) {
+                if (aspirante.getIdSector() == Integer.valueOf(token.nextToken())) {
+                    System.out.println("Se encontró la oferta: " + token.nextToken());
+                    // Evalua la vacante y responde
+                    ZMQ.Socket respuestaSocket = context.createSocket(SocketType.PUB);
+                    respuestaSocket.bind("tcp://*:3099");
+                    respuestaSocket.bind("ipc://respuesta");
 
-            String respuestaAspirante = String.format("%d-%b", id, acepta);
-            respuestaSocket.send(respuestaAspirante, 0);
+                    System.out.println("Acepta la vacante? (y/n)");
 
-            // Thread.sleep(5000);
+                    String acepta = System.console().readLine();
+
+                    int id = 0;
+                    Thread.sleep(2000);
+                    
+                    String respuestaAspirante = String.format("%d-%s", id, acepta);
+                    respuestaSocket.send(respuestaAspirante, 0);
+
+                    Thread.sleep(2000);
+                    break;
+                }
+            }
+
         } catch (Exception e) {
             System.err.println(" System exception: " + e);
         }
