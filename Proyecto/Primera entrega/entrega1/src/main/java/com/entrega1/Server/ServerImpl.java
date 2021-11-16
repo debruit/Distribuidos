@@ -31,8 +31,7 @@ public class ServerImpl {
     static String antecesorIP = info[4];
 
     public static void main(String args[]) throws Exception {
-        inicializarDHT();
-
+        // inicializarDHT();
         try (ZContext context = new ZContext()) {
             System.out.println("Corriendo servidor " + serverId + " ...");
 
@@ -131,14 +130,17 @@ public class ServerImpl {
         int key = Math.abs(ofertaStr.hashCode());
         key = key % 256;
         String response;
-        int lowRange = predecesor > serverId ? 0 : predecesor;
+        int lowRange = predecesor > serverId ? -1 : predecesor;
         if (lowRange < key && key <= serverId) {
             guardarEnDHT(Integer.toString(key), oferta);
             response = "Llave: " + key + "; Oferta: " + ofertaStr + " OK en el servidor (" + serverId + ")";
         } else {
-            // sucesorServer.send(ofertaStr);
-            response = "Oferta " + ofertaStr + " NO va en el servidor (" + serverId + ")";
+            sucesorServer.send("Oferta-" + ofertaStr);
+            // response = "Oferta " + ofertaStr + " NO va en el servidor (" + serverId +
+            // ")";
+            System.out.println("Llave: " + key + "; Oferta " + ofertaStr + " Enviada al sucesor ");
             // response = "Oferta " + ofertaStr + " Enviada al sucesor ";
+            response = sucesorServer.recvStr(0).trim();
         }
         return response;
     }
@@ -174,35 +176,9 @@ public class ServerImpl {
         ht.put(key, value);
         System.out.println("Nueva HT:");
         System.out.println(ht);
-        // FileOutputStream fos = null;
-        // ObjectOutputStream salida = null;
-        // try {
-        // PrintWriter pw = new PrintWriter(new File("Proyecto/Primera
-        // entrega/entrega1/ofertas"));
-        // pw.write("");
-        // pw.close();
-        // fos = new FileOutputStream("Proyecto/Primera entrega/entrega1/ofertas",
-        // true);
-        // salida = new ObjectOutputStream(fos);
-        // salida.writeObject(ht);
-        // salida.close();
-        // fos.close();
-        // } catch (Exception e) {
-        // System.out.println("Error guardarEnDHT: " + e.getMessage());
-        // return false;
-        // }
         return true;
     }
 
     public static void inicializarDHT() {
-        // try {
-        // FileInputStream fi = new FileInputStream(new File("Proyecto/Primera
-        // entrega/entrega1/ofertas"));
-        // ObjectInputStream oi = new ObjectInputStream(fi);
-        // ht = (Hashtable<String, Oferta>) oi.readObject();
-        // System.out.println(ht);
-        // } catch (Exception e) {
-        // System.out.println("Error inicializarDHT: " + e.getMessage());
-        // }
     }
 }
