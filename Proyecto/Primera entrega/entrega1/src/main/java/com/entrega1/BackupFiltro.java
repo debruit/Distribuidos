@@ -25,12 +25,16 @@ import org.zeromq.ZMQ;
  */
 public class BackupFiltro {
 
-  static String[] serversIps = { "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103" };
+  // static String[] serversIps = { "tcp://127.0.0.1:1101",
+  // "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103" };
+  static String[] serversIps = { "tcp://25.83.21.137:1101", "tcp://25.12.51.131:1102", "tcp://25.78.26.72:1103" };
   // static String[] serversIps = { "tcp://25.83.21.137:1101",
   // "tcp://25.12.51.131:1102", "tcp://127.0.0.1:1103" };
   static String aspiranteIp = "";
   static String empleadorIp = "";
   static ArrayList<String> respuestas = new ArrayList<String>();
+  // ArrayList<Aspirante> solicitudes = new ArrayList<Aspirante>();
+  // ArrayList<Oferta> ofertas = getBackupOfertas();
 
   public static void main(String args[]) {
     ArrayList<Aspirante> solicitudes = new ArrayList<>();
@@ -40,7 +44,7 @@ public class BackupFiltro {
 
       // Socket con filtro
       ZMQ.Socket server = context.createSocket(SocketType.REQ);
-      server.connect("tcp://127.0.0.1:2777");
+      server.connect("tcp://25.83.21.137:2777");
       server.setReceiveTimeOut(5000);
 
       while (!Thread.currentThread().isInterrupted()) {
@@ -103,49 +107,6 @@ public class BackupFiltro {
     }
   }
 
-  public static void enviarInfoBackup(ZContext context) {
-    ArrayList<Aspirante> solicitudes = new ArrayList<>();
-    ArrayList<Oferta> ofertas = new ArrayList<>();
-    // try (ZContext context = new ZContext()) {
-    // Socket con backupfiltro
-    ZMQ.Socket backfiltro = context.createSocket(SocketType.REP);
-    backfiltro.bind("tcp://127.0.0.1:2777");
-    // backfiltro.setReceiveTimeOut(6000);
-
-    // while (!Thread.currentThread().isInterrupted()) {
-    String msjRecibido = backfiltro.recvStr(0).trim();
-    System.out.println("BackupFiltro: " + msjRecibido);
-    // if (msjRecibido.equals("PingBackup"))
-    backfiltro.send(getInfoBackup(solicitudes, ofertas).getBytes(ZMQ.CHARSET), 0);
-    // Thread.sleep(1000);
-    // }
-    // } catch (Exception e) {
-    // System.err.println("Server System exception: " + e);
-    // }
-  }
-
-  public static String getInfoBackup(ArrayList<Aspirante> solicitudes, ArrayList<Oferta> ofertas) {
-    String msj = "";
-    for (int i = 0; i < solicitudes.size(); i++) {
-      String sol = String.format("Aspirante-%d-%s-%s-%s-%d-%d", solicitudes.get(i).getIdAspirante(),
-          solicitudes.get(i).getNombre(), solicitudes.get(i).getHabilidades(), solicitudes.get(i).getEstudios(),
-          solicitudes.get(i).getExperiencia(), solicitudes.get(i).getIdSector());
-      msj = msj + "_" + sol;
-    }
-    msj = msj + "|";
-    for (int i = 0; i < solicitudes.size(); i++) {
-      String ofer = String.format("Oferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(),
-          ofertas.get(i).getIdSector(), ofertas.get(i).getIdEmpleador(), ofertas.get(i).getDescripcion(),
-          ofertas.get(i).getCargo(), ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(),
-          ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
-      msj = msj + "_" + ofer;
-    }
-    if (msj.equals("")) {
-      msj = "|";
-    }
-    return msj;
-  }
-
   public static void retomarFiltro(ArrayList<Aspirante> solicitudes, ArrayList<Oferta> ofertas) {
     // ArrayList<Aspirante> solicitudes = new ArrayList<Aspirante>();
     String solicitudServer = "", sector = "";
@@ -192,6 +153,9 @@ public class BackupFiltro {
           } else {
             done = false;
             agregarOferta(token, ofertas, context, sector, ofertaServer);
+            if (ofertas.size() > 9) {
+              ofertas.clear();
+            }
           }
 
           if (done) {
@@ -207,6 +171,29 @@ public class BackupFiltro {
     } catch (Exception e) {
       System.err.println(" System exception: " + e);
     }
+  }
+
+  public static String getInfoBackup(ArrayList<Aspirante> solicitudes, ArrayList<Oferta> ofertas) {
+    String msj = "";
+    for (int i = 0; i < ofertas.size(); i++) {
+      String ofer = String.format("%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.get(i).getId(), ofertas.get(i).getIdSector(),
+          ofertas.get(i).getIdEmpleador(), ofertas.get(i).getDescripcion(), ofertas.get(i).getCargo(),
+          ofertas.get(i).getSueldo(), ofertas.get(i).getExperiencia(), ofertas.get(i).getHabilidades(),
+          ofertas.get(i).getEstudios());
+      msj = msj + ofer + "_";
+    }
+    // msj = msj.substring(0, msj.indexOf("_"))
+    msj = msj + "|";
+    for (int i = 0; i < solicitudes.size(); i++) {
+      String sol = String.format("%d-%s-%s-%s-%d-%d", solicitudes.get(i).getIdAspirante(),
+          solicitudes.get(i).getNombre(), solicitudes.get(i).getHabilidades(), solicitudes.get(i).getEstudios(),
+          solicitudes.get(i).getExperiencia(), solicitudes.get(i).getIdSector());
+      msj = msj + "_" + sol;
+    }
+    // if (msj.equals("")) {
+    // msj = "|";
+    // }
+    return msj;
   }
 
   public static void notificaciones(ZContext context) throws InterruptedException {
@@ -226,6 +213,21 @@ public class BackupFiltro {
         String oferta = token.nextToken();
         int idOferta = Integer.valueOf(token.nextToken());
         String nombre = token.nextToken();
+        String cargo = token.nextToken();
+        int sueldo = Integer.valueOf(token.nextToken());
+        int experiencia = Integer.valueOf(token.nextToken());
+        String habilidades = token.nextToken();
+        String estudios = token.nextToken();
+        Oferta ofertas = new Oferta();
+        ofertas.setId(idOferta);
+        ofertas.setDescripcion(oferta);
+        ofertas.setIdEmpleador(idEmpleador);
+        ofertas.setIdSector(idSector);
+        ofertas.setCargo(cargo);
+        ofertas.setSueldo(sueldo);
+        ofertas.setExperiencia(experiencia);
+        ofertas.setHabilidades(habilidades);
+        ofertas.setEstudios(estudios);
 
         int filter = 0;
         // Construir el mensaje de la vacante a enviar al aspirante
@@ -249,6 +251,23 @@ public class BackupFiltro {
 
         if (response.contains("y")) {
           acepto = "Aceptó la oferta";
+
+          ZMQ.Socket server1 = context.createSocket(SocketType.REQ);
+          ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
+          ZMQ.Socket server3 = context.createSocket(SocketType.REQ);
+          // server.connect("tcp://25.12.51.131:1098");
+          // server.connect("tcp://127.0.0.1:1098");
+          server1.connect(serversIps[0]);
+          server2.connect(serversIps[1]);
+          server3.connect(serversIps[2]);
+
+          String ofertaServer = String.format("BorrarOferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.getId(),
+              ofertas.getIdSector(), ofertas.getIdEmpleador(), ofertas.getDescripcion(), ofertas.getCargo(),
+              ofertas.getSueldo(), ofertas.getExperiencia(), ofertas.getHabilidades(), ofertas.getEstudios());
+
+          server1.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          server3.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
         } else {
           acepto = "Rechazó la oferta";
         }
@@ -313,6 +332,8 @@ public class BackupFiltro {
           server1.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
           server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
           server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+          // server2.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
+          // server3.send(solicitudServer.getBytes(ZMQ.CHARSET), 0);
         } else if (sector.contains("Cientifico") || sector.contains("Fisico")) {
           System.out.println("Sector: PROFESIONALES CIENTIFICOS E INTELECTUALES");
 
@@ -400,6 +421,9 @@ public class BackupFiltro {
       ZMQ.Socket server21 = context.createSocket(SocketType.REQ);
       ZMQ.Socket server22 = context.createSocket(SocketType.REQ);
       ZMQ.Socket server23 = context.createSocket(SocketType.REQ);
+      server21.setReceiveTimeOut(2000);
+      server22.setReceiveTimeOut(2000);
+      server23.setReceiveTimeOut(2000);
       // server2.connect("tcp://25.12.51.131:1098");
       // server2.connect("tcp://127.0.0.1:1098");
       server21.connect(serversIps[0]);
@@ -421,9 +445,16 @@ public class BackupFiltro {
               ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
           // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          if (0 <= i && i <= 3) {
+            server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (4 <= i && i <= 6) {
+            server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (7 <= i && i <= 10) {
+            server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          }
+          // server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          // server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          // server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
         } else if (sector.contains("Cientifico") || sector.contains("Fisico")) {
           System.out.println("Sector: PROFESIONALES CIENTIFICOS E INTELECTUALES");
 
@@ -435,9 +466,13 @@ public class BackupFiltro {
               ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
           // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          if (0 <= i && i <= 3) {
+            server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (4 <= i && i <= 6) {
+            server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (7 <= i && i <= 10) {
+            server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          }
         } else if (sector.contains("Ingeniero") || sector.contains("Tecnico") || sector.contains("Operario")
             || sector.contains("Asistente")) {
           System.out.println("Sector: TECNICOS Y PROFESIONALES");
@@ -450,9 +485,13 @@ public class BackupFiltro {
               ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
           // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          if (0 <= i && i <= 3) {
+            server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (4 <= i && i <= 6) {
+            server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (7 <= i && i <= 10) {
+            server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          }
         } else if (sector.contains("Administrativo") || sector.contains("Secretaria")
             || sector.contains("Recepcionista") || sector.contains("Auxiliar")) {
           System.out.println("Sector: PERSONAL DE APOYO ADMNISTRATIVO");
@@ -465,9 +504,13 @@ public class BackupFiltro {
               ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
           // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          if (0 <= i && i <= 3) {
+            server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (4 <= i && i <= 6) {
+            server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (7 <= i && i <= 10) {
+            server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          }
         } else if (sector.contains("Agricultor") || sector.contains("Pesquero")) {
           System.out.println("Sector: AGRICULTORES FORESTALES Y PESQUEROS");
 
@@ -479,19 +522,33 @@ public class BackupFiltro {
               ofertas.get(i).getHabilidades(), ofertas.get(i).getEstudios());
 
           // server2.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
-          server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          if (0 <= i && i <= 3) {
+            server21.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (4 <= i && i <= 6) {
+            server22.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          } else if (7 <= i && i <= 10) {
+            server23.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
+          }
         }
         // byte[] reply = server2.recv(0);
-        byte[] reply1 = server21.recv(0);
-        byte[] reply2 = server22.recv(0);
-        byte[] reply3 = server23.recv(0);
+        if (0 <= i && i <= 3) {
+          byte[] reply1 = server21.recv(0);
+          System.out.println(new String(reply1, ZMQ.CHARSET));
+        } else if (4 <= i && i <= 6) {
+          byte[] reply2 = server22.recv(0);
+          System.out.println(new String(reply2, ZMQ.CHARSET));
+        } else if (7 <= i && i <= 10) {
+          byte[] reply3 = server23.recv(0);
+          System.out.println(new String(reply3, ZMQ.CHARSET));
+        }
+        // byte[] reply1 = server21.recv(0);
+        // byte[] reply2 = server22.recv(0);
+        // byte[] reply3 = server23.recv(0);
 
         // System.out.println(new String(reply, ZMQ.CHARSET));
-        System.out.println(new String(reply1, ZMQ.CHARSET));
-        System.out.println(new String(reply2, ZMQ.CHARSET));
-        System.out.println(new String(reply3, ZMQ.CHARSET));
+        // System.out.println(new String(reply1, ZMQ.CHARSET));
+        // System.out.println(new String(reply2, ZMQ.CHARSET));
+        // System.out.println(new String(reply3, ZMQ.CHARSET));
         System.out.println();
 
       }

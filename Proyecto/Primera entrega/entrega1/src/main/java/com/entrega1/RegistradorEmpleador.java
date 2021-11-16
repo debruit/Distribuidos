@@ -28,7 +28,7 @@ public class RegistradorEmpleador {
 
             try {
                 // File file = new File("empleador.txt");
-                File file = new File("empleador.txt");
+                File file = new File("Proyecto\\Primera entrega\\entrega1\\empleador.txt");
                 Scanner myReader = new Scanner(file);
                 Oferta consulta = new Oferta();
                 filtro = 0;
@@ -70,7 +70,7 @@ public class RegistradorEmpleador {
         }
         try (ZContext context = new ZContext()) {
             ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-            subscriber.connect("tcp://127.0.0.1:4099");
+            subscriber.connect("tcp://25.12.51.131:4099");
             System.out.println("Esperando respuesta aspirante...");
 
             // Id del sector

@@ -25,10 +25,11 @@ import org.zeromq.ZMQ;
  */
 public class filtro {
 
-    static String[] serversIps = { "tcp://127.0.0.1:1101", "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103" };
-    // static String[] serversIps = { "tcp://25.83.21.137:1101",
-    // "tcp://25.12.51.131:1102", "tcp://127.0.0.1:1103" };
+    // static String[] serversIps = { "tcp://127.0.0.1:1101",
+    // "tcp://127.0.0.1:1102", "tcp://127.0.0.1:1103" };
+    static String[] serversIps = { "tcp://25.83.21.137:1101", "tcp://25.12.51.131:1102", "tcp://25.78.26.72:1103" };
     static String aspiranteIp = "";
+
     static String empleadorIp = "";
     static ArrayList<String> respuestas = new ArrayList<String>();
     // ArrayList<Aspirante> solicitudes = new ArrayList<Aspirante>();
@@ -46,7 +47,7 @@ public class filtro {
         try (ZContext context = new ZContext()) {
             System.out.println("Corriendo filtro...");
             ZMQ.Socket subscriber = context.createSocket(SocketType.SUB);
-            subscriber.connect("tcp://127.0.0.1:1099");
+            subscriber.connect("tcp://25.12.51.131:1099");
 
             String solicitud = "0";
 
@@ -55,7 +56,7 @@ public class filtro {
 
             subscriber.setReceiveTimeOut(1000);
             ZMQ.Socket backfiltro = context.createSocket(SocketType.REP);
-            backfiltro.bind("tcp://127.0.0.1:2777");
+            backfiltro.bind("tcp://25.83.21.137:2777");
             backfiltro.setReceiveTimeOut(200);
             // backfiltro.setSendTimeOut(1000);
             while (true) {
@@ -147,7 +148,7 @@ public class filtro {
                 int experiencia = Integer.valueOf(token.nextToken());
                 String habilidades = token.nextToken();
                 String estudios = token.nextToken();
-                Oferta ofertas= new Oferta();
+                Oferta ofertas = new Oferta();
                 ofertas.setId(idOferta);
                 ofertas.setDescripcion(oferta);
                 ofertas.setIdEmpleador(idEmpleador);
@@ -167,7 +168,7 @@ public class filtro {
 
                 // Respuesta del aspirante
                 ZMQ.Socket respuestaSocket = context.createSocket(SocketType.SUB);
-                respuestaSocket.connect("tcp://127.0.0.1:3099");
+                respuestaSocket.connect("tcp://25.12.51.131:3099");
 
                 //
                 String acepta = "0";
@@ -191,9 +192,8 @@ public class filtro {
                     server3.connect(serversIps[2]);
 
                     String ofertaServer = String.format("BorrarOferta-%d-%d-%d-%s-%s-%d-%d-%s-%s", ofertas.getId(),
-                            ofertas.getIdSector(), ofertas.getIdEmpleador(),
-                            ofertas.getDescripcion(), ofertas.getCargo(), ofertas.getSueldo(),
-                            ofertas.getExperiencia(), ofertas.getHabilidades(),
+                            ofertas.getIdSector(), ofertas.getIdEmpleador(), ofertas.getDescripcion(),
+                            ofertas.getCargo(), ofertas.getSueldo(), ofertas.getExperiencia(), ofertas.getHabilidades(),
                             ofertas.getEstudios());
 
                     server1.send(ofertaServer.getBytes(ZMQ.CHARSET), 0);
@@ -352,7 +352,7 @@ public class filtro {
         ofertas.add(temp2);
         setBackupOfertas(ofertas);
 
-        if (ofertas.size() > 10) {
+        if (ofertas.size() > 0) {
             // ZMQ.Socket server2 = context.createSocket(SocketType.REQ);
             ZMQ.Socket server21 = context.createSocket(SocketType.REQ);
             ZMQ.Socket server22 = context.createSocket(SocketType.REQ);
@@ -365,7 +365,7 @@ public class filtro {
             server21.connect(serversIps[0]);
             server22.connect(serversIps[1]);
             server23.connect(serversIps[2]);
-            for (int i = 0; i < ofertas.size(); i++) {
+            for (int i = 10; i < ofertas.size(); i++) {
 
                 sector = ofertas.get(i).getCargo();
 
@@ -495,6 +495,8 @@ public class filtro {
             }
             clearBackupOfertas();
             ofertas.clear();
+        } else {
+            System.out.println("Se añadio oferta" + temp2 + " a la cola");
         }
         return true;
 
